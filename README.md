@@ -1,6 +1,10 @@
 # 跨域迁移脑暴
 
+A Claude skill for cross-domain ideation through mechanism transfer.
+
 一个用于 **产品创新 / 功能创新 / 交互创新 / 服务模式创新** 的 Claude Skill。
+
+Instead of copying surface features from competitors, this skill helps generate new product, feature, interaction, and service ideas by borrowing deeper mechanisms from unrelated domains.
 
 它不靠行业内横向借鉴，而是通过 **跨域机制迁移** 打破思维惯性：
 
