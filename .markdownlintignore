@@ -1,0 +1,9 @@
+.npm-cache/
+.npm-cache/**
+**/.npm-cache/**
+node_modules/
+node_modules/**
+**/node_modules/**
+.git/
+.venv/
+venv/

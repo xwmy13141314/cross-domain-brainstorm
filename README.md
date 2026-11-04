@@ -1,181 +1,265 @@
-# 跨域迁移脑暴
+# 跨域迁移脑暴 v0.2
 
-A Claude skill for cross-domain ideation through mechanism transfer.
+A cross-domain ideation skill that transfers **causal mechanisms**, not surface features.
 
-一个用于 **产品创新 / 功能创新 / 交互创新 / 服务模式创新** 的 Claude Skill。
+一个用于产品/功能/交互/服务模式创新的跨域脑暴 skill：从结构异质的领域借“因果机制”，严格映射到目标问题，最后给出一个小组合的、可被证伪的下注。
 
-Instead of copying surface features from competitors, this skill helps generate new product, feature, interaction, and service ideas by borrowing deeper mechanisms from unrelated domains.
+它不靠“看竞品、做组合”，而是靠：
 
-它不靠行业内横向借鉴，而是通过 **跨域机制迁移** 打破思维惯性：
+> **问题解码 → 距离采样 → 机制卡 → 结构嫁接 → 组合决策 → 红队**
 
-- 锁定问题
-- 抽取跨域领域
-- 提炼底层机制
-- 强制嫁接
-- 发散出创意池
-- 收敛成 Top 3
+---
 
-这个 Skill 的目标不是直接给“标准答案”，而是先帮用户跳出同质化方案，炸出一批真正有变化感的候选创意。
+## v0.2 有什么不同
+
+v0.1 是一个轻量、好用的创意框架；v0.2 把它升级成一个**可追溯、可检验、可证伪**的机制迁移引擎。
+
+| 维度 | v0.1 | v0.2 |
+|---|---|---|
+| 领域 | 静态清单 + 三分类 | 结构三轴 + 情境四轴 + 48 领域牌堆 + wildcard |
+| 机制 | 一句模板 | 9 字段机制卡 + 触发/反馈/失效前提 |
+| 嫁接 | 固定句式 | 结构映射 + 5 个表面复制测试 + 组合/负向迁移 |
+| 发散 | 6 个，提前看评分 | 10-18 个，发散/收敛分离 |
+| 收敛 | 4 维 0-2 分，Top 3 | 反平庸 + 门槛 + safe/bold/wildcard + 最便宜证伪 |
+| 验证 | 通用建议 | 最危险假设 + 便宜实验 + 阈值 + kill 条件 |
+| 伦理 | 无 | 必过红队 |
+| 团队 | 主持词 | 时间盒 + 静默写作 + 轮流 + dot voting + pre-mortem |
+| 评测 | 无 | 6 case + 7 维 rubric + A/B 协议 |
+
+---
 
 ## 它解决什么问题
 
-很多产品 brainstorm 之所以低效，不是因为团队不努力，而是因为大家的思路都被困在同一个行业框架里。
-
-最后会发生几件事：
+很多 product brainstorm 低效，不是因为团队不努力，而是因为大家的思路都被困在同一个行业框架里：
 
 - 点子越想越像同行
 - 方案越聊越保守
-- 一开会就在讨论可行性
-- 还没发散，就已经开始否定
+- 一开会就讨论可行性
+- 还没发散，就开始否定
+- 最后选出的“Top 3”是三个安全但相似的功能
 
-`跨域迁移脑暴` 的作用，就是强行打破这种局面。
+`跨域迁移脑暴` 的作用，是强行打破这种局面：从别的行业/系统/领域借**底层解法**，而不是抄表面功能；再用机制卡、结构映射和红队，把“听起来很妙”变成“说得清、测得了”。
 
-它通过“抽领域 → 抽机制 → 强制嫁接”的方式，让团队从别的行业、别的系统、别的产品逻辑里借到 **底层解法**，而不是抄表面功能。
+---
 
-## 适合什么场景
+## 什么时候用
 
-适合在这些情况下使用：
+- 现有方案同质化，明显被行业惯性锁死
+- 脑暴卡住，需要结构性刺激
+- 想要多个候选，而不是一个直接建议
+- 需要说清“这个点子借了什么机制、为什么可能成立”
+- 团队共创/工作坊，需要发散 + 收敛的完整流程
 
-- brainstorm / 头脑风暴卡住
-- 现有方案过于同质化
-- 想从其他行业借机制，而不是抄功能
-- 团队共创时需要快速打开思路
-- 产品、功能、交互、服务模式都需要重新找突破口
+高匹配表达：
 
-高匹配表达包括：
-
-- “帮我跨界脑暴一下这个功能”
-- “帮我用别的行业机制想新方案”
+- “帮我跨界脑暴一下”
+- “用别的行业机制想新功能”
 - “当前脑暴卡住了，帮我炸点新想法”
-- “想做一些不那么像同行的产品创意”
+- “想跳出行业内卷，借别的领域机制看看”
+- “帮我做功能/交互/模式创新，多给几个方向”
 
-## 不适合什么场景
+## 什么时候不用
 
-这个 Skill **不适合** 用来做：
+- 深度行业研究、竞品报告、市场规模测算
+- 替用户做最终战略拍板/预算决策
+- 用户只想要 1 个直接建议/明确答案
+- 已经有明确方案，只需要执行、排期或 PRD
+- 纯文案、文章、标题
 
-- 行业研究 / 竞品研究
-- 根因分析 / 复盘
-- 战略判断 / 方向选择
-- PRD 定稿
-- 文章写作
+如果用户给的是**方案**（“我要个提醒”），skill 会先做一次“问题解码”，再开始。
 
-如果你的目标是“研究清楚”，那应该先用别的 Skill；
-如果你的目标是“先炸出新点子”，这个 Skill 才是对的。
+---
 
-## 核心原则
+## 两种速度
 
-- 迁移 **底层机制**，不要照搬 **表面功能**
-- 发散阶段不提前否定
-- 收敛阶段再引入理性判断
-- 先追求候选数量和多样性，再追求最优解
-- 如果结果只是“把别人的界面 / 按钮 / 玩法搬过来”，判定为低质量创意
+| | Quick（默认） | Deep |
+|---|---|---|
+| 时间 | 约 15 分钟 | 60-90 分钟 |
+| 领域 | 3 个 | 5 个 |
+| 机制 | 3 张卡 | 3-5 张卡 |
+| 候选 | 10 个左右 | 15-18 个 |
+| 输出 | 2 页 | 4 页 + 决策 memo |
+| 适合 | 聊天、单人、快速破局 | 工作坊、高风险、需要买账 |
 
-这也是它和普通 brainstorm 的区别：
+Quick 不是“简化版的方法”，而是“同样的方法，少填几张表”。门槛和测试不能省。
 
-它不是泛发散，而是 **结构化跨域发散**。
+---
 
-## 默认工作流
+## 快速开始
 
-1. 锁定目标对象和单一核心痛点
-2. 抽取 3 个异质领域
-3. 提炼每个领域的底层机制
-4. 将机制强制嫁接到目标对象上
-5. 发散出创意池
-6. 快速收敛出 Top 3 和验证建议
+把整个目录作为 skill 安装到你的 agent runtime（确保 `SKILL.md` 在 skill 根目录），然后直接说：
 
-## 目录结构
+> “我们做 AI 笔记 App，用户记完不回看。帮我做一次跨域脑暴，给我几个值得推进的方向。”
+
+或者更具体：
+
+> “我们做老人智能家居，子女想监控但老人抗拒。帮我用跨域机制找几个不侵犯隐私的方向。”
+
+Skill 会：
+
+1. 解码问题，写一句 brief
+2. 标目标的结构坐标
+3. 抽 3 个结构异质领域（含 wildcard）
+4. 提炼机制卡（带失效前提）
+5. 做结构映射，生成 10 个左右候选
+6. 选 safe/bold/wildcard 组合，每个带便宜实验
+7. 过红队，给出下一步
+
+---
+
+## 它和普通 brainstorm 的区别
+
+### 1. 迁移机制，不搬功能
+
+不是“给笔记加经验条”，而是“小任务 → 即时反馈 → 累积 → 解锁”的因果回路。
+
+### 2. 距离要解释
+
+不是“越远越好”，而是“结构不同 + 能桥接”。用结构三轴（集中/同步/验证）避免“行业标签异质”。
+
+### 3. 机制要可证伪
+
+每张机制卡必须写“失效前提”：若＿不成立，它退化为＿。写不出，就是功能。
+
+### 4. 嫁接要结构对应
+
+来源要素 → 目标要素 → 保持的关系 → 断裂的假设 → 谁验证反馈。不是修辞类比。
+
+### 5. 组合 > 排名
+
+不选三个最高分，而选 safe / bold / wildcard；每个下注带最危险假设、便宜实验、阈值、kill 条件。
+
+### 6. 伦理是门槛
+
+操纵、成瘾、隐私、歧视、安全：一票否决或 redesign，不靠“用户接受度高”放行。
+
+---
+
+## 文件结构
 
 ```text
 cross-domain-brainstorm/
-├── README.md
 ├── SKILL.md
-└── references/
-    ├── domain-library.md
-    ├── mechanism-examples.md
-    ├── output-templates.md
-    └── example-session.md
+├── README.md
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── references/
+│   ├── domain-library.md          # 距离模型 + 48 领域牌堆
+│   ├── mechanism-examples.md      # 机制卡 + 5 个检验 + 样例
+│   ├── grafting.md                # 结构映射 + 表面复制测试 + 组合/负向迁移
+│   ├── convergence.md             # 反平庸 + 门槛 + 组合 + 假设实验
+│   ├── red-team.md                # 伦理/现状/二阶效应/高风险
+│   ├── facilitation.md            # 团队工作坊协议
+│   ├── output-templates.md        # Quick/Deep 模板
+│   ├── example-session.md         # AI 笔记 App 完整演练
+│   └── example-session-hardware.md# 老人智能家居完整演练
+├── assets/
+│   └── domain-deck.json           # 48 领域结构化数据
+├── scripts/
+│   ├── domain_sampler.py          # 确定性领域抽样
+│   ├── validate_skill.py          # 包校验
+│   └── package.ps1                # 重新打包 zip
+├── evals/
+│   ├── cases.md                   # 6 个评测 case
+│   ├── rubric.md                  # 7 维 rubric + 门槛
+│   └── run.md                     # A/B 协议
+└── .github/workflows/ci.yml       # 校验 + markdown lint
 ```
 
-## 文件说明
+---
 
-### `SKILL.md`
-技能主体，定义：
-- 触发条件
-- 适用边界
-- 最小工作流
-- 默认输出格式
-- 失败兜底策略
+## 领域抽样（可选脚本）
 
-### `references/domain-library.md`
-跨域领域库，提供：
-- 传统行业领域
-- AI / 数字领域
-- 服务 / 流程领域
-- 抽样建议与反差组合建议
+`scripts/domain_sampler.py` 是一个纯标准库的确定性抽样器，读取 `assets/domain-deck.json`：
 
-### `references/mechanism-examples.md`
-机制提炼方法，重点解决：
-- 什么叫“机制”
-- 什么不是机制
-- 高质量迁移 vs 低质量迁移
-- 常见机制类型清单
+```bash
+python scripts/domain_sampler.py --target "AI 笔记" \
+  --axis substrate=digital --axis centralization=distributed \
+  --axis sync=episodic --axis risk=low --axis resource=abundant \
+  --axis verification=self_reported --axis agent=individual \
+  --seed 42
+```
 
-### `references/output-templates.md`
-标准输出模板，包含：
-- 创意池模式
-- Top 3 模式
-- 单人模式
-- 团队主持模式
-- 快速打分模板
+输出 3 个领域（2 个高距离 + 1 个 wildcard），带距离轴、结构差异、桥接提示和机制。
 
-### `references/example-session.md`
-完整演练案例，用来校准这个 Skill 的输出风格和深度。
+Deep 模式：
 
-## 典型使用方式
+```bash
+python scripts/domain_sampler.py ... --count 5 --anti-domain
+```
 
-这个 Skill 最适合搭配真实问题使用。
+脚本只是“抽牌器”，不替代判断；桥、机制、验证仍要人来写。
 
-例如：
+---
 
-- AI 笔记 App，用户记完不回看
-- 智能手表，户外运动时操作复杂
-- 企业知识库，内容太多但不知道哪个能直接用
-- 订阅产品，用户注册后留存不足
+## 示例
 
-如果它跑得好，你会发现它生成的点子不是“像同行”，而是“像借了别的领域的脑子”。
+- [AI 笔记 App](references/example-session.md)：低风险、数字、个人；演示如何淘汰“经验条/AI 摘要/每日提醒”，用分诊/审计/免疫系统生成“决策票据/风险票据/记忆集”等。
+- [老人智能家居](references/example-session-hardware.md)：高风险、物理、多利益相关者；演示如何用检查单/交接班/日课，避免“更多摄像头/健康评分”。
 
-## 建议搭配的其他 Skill
+---
 
-- `hv-analysis`
-  - 用于深度研究、竞品分析、行业分析
-- `product-thinking`
-  - 用于产品方向判断、机会分析
-- `khazix-writer`
-  - 用于把创意写成文章或长文
+## 评测
 
-## 安装后建议
+`evals/` 提供 6 个 case、7 维 rubric、A/B 协议。
 
-优先用两个真实案例试跑：
+```bash
+python scripts/validate_skill.py
+python scripts/domain_sampler.py --self-test
+```
 
-1. AI 产品
-   - 例如：AI 笔记 App、AI 写作工具、AI Agent 工具
-2. 非 AI 场景
-   - 例如：智能手表、家电、线下服务流程
+CI 会跑：
 
-这样最容易验证这个 Skill 是否真的在“迁机制”，而不是在“抄功能”。
+- 包结构/链接/表格校验
+- 领域 deck schema
+- 抽样器自测
+- markdown lint
 
-## 当前版本说明
+---
 
-当前版本是第一版可用结构，重点先保证：
+## 安装
 
-- 边界清晰
-- 流程轻量
-- 输出稳定
-- 易于继续迭代
+1. 克隆/下载本目录。
+2. 放到你的 agent runtime 的 skills 目录（例如 Claude Skills 的 `skills/cross-domain-brainstorm/`）。
+3. 确保 `SKILL.md` 在 skill 根目录，`references/`、`assets/` 同级。
+4. 重启/刷新会话，让 skill 被加载。
 
-后续可以继续增强的方向包括：
+不同 runtime 的安装路径不同；核心要求只有一条：`SKILL.md` 在 skill 根目录，引用的相对路径存在。
 
-- 更丰富的领域库
-- 更强的机制迁移反例库
-- 更贴近会议场景的主持模式
-- 更明确的创意打分与淘汰逻辑
+---
+
+## 贡献
+
+见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+改动行为前，先跑：
+
+```bash
+python scripts/validate_skill.py
+python scripts/domain_sampler.py --self-test
+```
+
+如果你改了输出格式/流程，附一个 before/after 的 eval 记录。
+
+---
+
+## License
+
+MIT。见 [LICENSE](LICENSE)。
+
+---
+
+## English summary
+
+`cross-domain-brainstorm` is a cross-domain ideation skill. Instead of copying features from other industries, it transfers **causal mechanisms**: trigger → feedback → causal chain → failure precondition. It samples structurally distant domains (not just different industry labels), maps source elements to target elements, separates divergence from convergence, and selects a portfolio of **safe / bold / wildcard** bets, each with a falsifiable assumption and a cheap test.
+
+**Modes**: Quick (~15 min, ~10 ideas) and Deep (~90 min, 15-18 ideas).
+
+**Core principle**: transfer mechanisms, not features; require a failure precondition; verify the feedback signal; put ethics before scoring.
+
+**Repo layout**: `SKILL.md` is the entry point; `references/` contains the domain deck, mechanism cards, grafting, convergence, red team, facilitation, templates, and two full worked examples; `evals/` contains 6 cases, a 7-dimension rubric, and an A/B protocol.
+
+**Install**: place this folder in your agent's skills directory, with `SKILL.md` at the skill root. See [README.md](README.md) for details.
+
+**License**: MIT.

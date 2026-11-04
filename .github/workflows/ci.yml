@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate skill package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate structure, links, deck, evals, tables
+        run: python scripts/validate_skill.py
+      - name: Domain sampler self-test
+        run: python scripts/domain_sampler.py --self-test
+
+  markdown:
+    name: Markdown lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: markdownlint-cli2
+        run: npx --yes markdownlint-cli2@0.13.0 "SKILL.md" "README.md" "CHANGELOG.md" "CONTRIBUTING.md" "references/*.md" "evals/*.md"
