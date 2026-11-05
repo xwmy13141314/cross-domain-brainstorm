@@ -18,7 +18,7 @@ $pkg = Join-Path $staging 'cross-domain-brainstorm'
 try {
     New-Item -ItemType Directory -Path $pkg -Force | Out-Null
 
-    $files = @('SKILL.md', 'README.md', 'CHANGELOG.md', 'CONTRIBUTING.md', 'LICENSE', '.gitignore', '.markdownlint.json', '.markdownlintignore')
+    $files = @('SKILL.md', 'README.md', 'CHANGELOG.md', 'PRD.md', 'CONTRIBUTING.md', 'LICENSE', '.gitignore', '.markdownlint.json', '.markdownlintignore')
     foreach ($file in $files) {
         $source = Join-Path $root $file
         if (Test-Path $source) {
@@ -26,7 +26,7 @@ try {
         }
     }
 
-    $dirs = @('references', 'assets', 'scripts', 'evals', '.github')
+    $dirs = @('references', 'assets', 'scripts', 'evals', 'docs', '.github')
     foreach ($dir in $dirs) {
         $source = Join-Path $root $dir
         if (Test-Path $source) {

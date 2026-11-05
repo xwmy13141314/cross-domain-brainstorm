@@ -32,4 +32,4 @@ jobs:
         with:
           node-version: "20"
       - name: markdownlint-cli2
-        run: npx --yes markdownlint-cli2@0.13.0 "SKILL.md" "README.md" "CHANGELOG.md" "CONTRIBUTING.md" "references/*.md" "evals/*.md"
+        run: npx --yes markdownlint-cli2@0.13.0 "SKILL.md" "README.md" "CHANGELOG.md" "PRD.md" "CONTRIBUTING.md" "references/*.md" "evals/*.md" "docs/*.md"

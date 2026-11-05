@@ -20,6 +20,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+VERSION = "0.2.1"  # bump together with SKILL.md frontmatter and assets/domain-deck.json
 AXES = {
     "substrate": {"physical", "digital", "social", "biological", "institutional"},
     "centralization": {"centralized", "distributed", "networked"},
@@ -34,6 +35,8 @@ REQUIRED = [
     "SKILL.md",
     "README.md",
     "CHANGELOG.md",
+    "PRD.md",
+    f"docs/RELEASE-NOTES-v{VERSION}.md",
     "LICENSE",
     "CONTRIBUTING.md",
     ".gitignore",
@@ -98,8 +101,8 @@ def check_frontmatter() -> None:
             fail(f"SKILL.md frontmatter missing {key}")
     if "cross-domain-brainstorm" not in front:
         fail("SKILL.md name must be cross-domain-brainstorm")
-    if "version: 0.2.0" not in front:
-        fail("SKILL.md frontmatter version must be 0.2.0")
+    if f"version: {VERSION}" not in front:
+        fail(f"SKILL.md frontmatter version must be {VERSION}")
     print("OK SKILL.md frontmatter")
 
 
@@ -143,9 +146,11 @@ def check_deck() -> dict:
         deck = json.loads(read(deck_path))
     except json.JSONDecodeError as exc:
         fail(f"domain-deck.json is not valid JSON: {exc}")
-    domains = deck.get("domains", [])
-    if len(domains) != 48:
-        fail(f"expected 48 domains, found {len(domains)}")
+    if deck.get("version") != VERSION:
+        fail(f"domain-deck.json version must be {VERSION}, found {deck.get('version')!r}")
+    if len(deck.get("domains", [])) != 48:
+        fail(f"expected 48 domains, found {len(deck.get('domains', []))}")
+    domains = deck["domains"]
     ids, names = set(), set()
     for domain in domains:
         for key in ("id", "name", "family", "axes", "mechanisms", "richness"):

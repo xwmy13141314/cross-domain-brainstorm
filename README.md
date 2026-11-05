@@ -1,4 +1,4 @@
-# 跨域迁移脑暴 v0.2
+# 跨域迁移脑暴 v0.2.1
 
 A cross-domain ideation skill that transfers **causal mechanisms**, not surface features.
 
@@ -7,6 +7,17 @@ A cross-domain ideation skill that transfers **causal mechanisms**, not surface 
 它不靠“看竞品、做组合”，而是靠：
 
 > **问题解码 → 距离采样 → 机制卡 → 结构嫁接 → 组合决策 → 红队**
+
+## 文档与版本
+
+| 文档 | 内容 |
+|---|---|
+| [PRD.md](PRD.md) | 产品需求文档：用户、目标、功能需求、验收标准 |
+| [CHANGELOG.md](CHANGELOG.md) | 版本记录（Keep a Changelog） |
+| [docs/RELEASE-NOTES-v0.2.1.md](docs/RELEASE-NOTES-v0.2.1.md) | 本版修改说明与升级指引 |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献指南与发布流程 |
+
+当前版本：**v0.2.1**（文档/发布层更新，无行为变化；行为版本为 v0.2.0）。
 
 ---
 
@@ -141,9 +152,12 @@ Skill 会：
 cross-domain-brainstorm/
 ├── SKILL.md
 ├── README.md
+├── PRD.md                           # 产品需求文档
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
 ├── LICENSE
+├── docs/
+│   └── RELEASE-NOTES-v0.2.1.md      # 本版修改说明
 ├── references/
 │   ├── domain-library.md          # 距离模型 + 48 领域牌堆
 │   ├── mechanism-examples.md      # 机制卡 + 5 个检验 + 样例
@@ -258,7 +272,7 @@ MIT。见 [LICENSE](LICENSE)。
 
 **Core principle**: transfer mechanisms, not features; require a failure precondition; verify the feedback signal; put ethics before scoring.
 
-**Repo layout**: `SKILL.md` is the entry point; `references/` contains the domain deck, mechanism cards, grafting, convergence, red team, facilitation, templates, and two full worked examples; `evals/` contains 6 cases, a 7-dimension rubric, and an A/B protocol.
+**Repo layout**: `SKILL.md` is the entry point; `PRD.md` documents goals, requirements, and acceptance criteria; `references/` contains the domain deck, mechanism cards, grafting, convergence, red team, facilitation, templates, and two full worked examples; `evals/` contains 6 cases, a 7-dimension rubric, and an A/B protocol; release notes live under `docs/`.
 
 **Install**: place this folder in your agent's skills directory, with `SKILL.md` at the skill root. See [README.md](README.md) for details.
 

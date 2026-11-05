@@ -14,7 +14,7 @@ python scripts/domain_sampler.py --self-test
 如果改了 Markdown：
 
 ```bash
-npx --yes markdownlint-cli2@0.13.0 "SKILL.md" "README.md" "CHANGELOG.md" "CONTRIBUTING.md" "references/*.md" "evals/*.md"
+npx --yes markdownlint-cli2@0.13.0 "SKILL.md" "README.md" "CHANGELOG.md" "PRD.md" "CONTRIBUTING.md" "references/*.md" "evals/*.md" "docs/*.md"
 ```
 
 如果改了 skill 包内容，重新打包：
@@ -58,6 +58,14 @@ pwsh -NoProfile -File scripts/package.ps1
 3. 至少覆盖一种新场景（数字/物理/高风险/公共服务/团队）。
 4. 在 `evals/run.md` 的样本计划里说明是否加入主评测。
 
+### 更新文档与版本
+
+1. 版本号在四处同步：`SKILL.md` frontmatter、`scripts/validate_skill.py` 的 `VERSION` 常量、`assets/domain-deck.json`、`README.md` 标题。
+2. 行为变化写 `CHANGELOG.md`；面向使用者的升级指引写 `docs/RELEASE-NOTES-v<版本>.md`，并把它加进 validator 的 REQUIRED 列表。
+3. 结构/需求变更同步 `PRD.md`（目标、FR、验收标准）。
+4. 用 `scripts/package.ps1` 重新打包 zip，解包后再跑一次 validator。
+5. 发布时打 tag（如 `v0.2.1`）并创建 GitHub Release。
+
 ### 改动流程/输出格式
 
 1. 更新 `SKILL.md` 和受影响的 `references/`。
@@ -76,8 +84,10 @@ pwsh -NoProfile -File scripts/package.ps1
 
 - [ ] `python scripts/validate_skill.py` 通过
 - [ ] `python scripts/domain_sampler.py --self-test` 通过
-- [ ] `npx --yes markdownlint-cli2@0.13.0 "SKILL.md" "README.md" "CHANGELOG.md" "CONTRIBUTING.md" "references/*.md" "evals/*.md"` 通过（如本地可用）
+- [ ] `npx --yes markdownlint-cli2@0.13.0 "SKILL.md" "README.md" "CHANGELOG.md" "PRD.md" "CONTRIBUTING.md" "references/*.md" "evals/*.md" "docs/*.md"` 通过（如本地可用）
 - [ ] `CHANGELOG.md` 已更新
+- [ ] 版本号四处一致（SKILL frontmatter / validator VERSION / deck / README 标题）
+- [ ] 行为变化附 release notes（`docs/`）并同步 `PRD.md`
 - [ ] 新增/修改的链接可打开
 - [ ] 没有把“功能”写成“机制”
 - [ ] 没有放行操纵/成瘾/隐私侵犯的示例

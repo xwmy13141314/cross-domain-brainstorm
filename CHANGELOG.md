@@ -10,6 +10,25 @@ The format is based on Keep a Changelog principles.
 
 - Reserved for upcoming changes.
 
+## [v0.2.1] - 2026-11-05
+
+Documentation and release-engineering patch. **No behavior changes**: the v0.2.0 workflow, quality gates, and output contract are unchanged.
+
+### Added
+
+- `PRD.md`: product requirements document covering background, users, goals/non-goals, 13 functional requirements (FR-1 … FR-13), non-functional requirements, user flows, acceptance criteria, metrics, release policy, risks, and open questions.
+- `docs/RELEASE-NOTES-v0.2.1.md`: user-facing change notes and upgrade steps; `docs/` reserved for future release notes and migration guides.
+
+### Changed
+
+- `README.md`: version bumped to v0.2.1; new "文档与版本" section linking PRD / CHANGELOG / release notes / CONTRIBUTING; file map now includes `PRD.md` and `docs/`.
+- `CHANGELOG.md`: added the `[v0.2.1]` entry.
+- `SKILL.md`: frontmatter `version: 0.2.1`, `updated: 2026-11-05`; title updated.
+- `assets/domain-deck.json`: `version: 0.2.1`, `updated: 2026-11-05`.
+- `scripts/validate_skill.py`: single `VERSION` constant now drives checks; requires `PRD.md` and `docs/RELEASE-NOTES-v0.2.1.md`; validates `SKILL.md` frontmatter version and deck version against `VERSION`.
+- `scripts/package.ps1`: now packages `PRD.md` and `docs/`; `cross-domain-brainstorm.zip` regenerated.
+- `CONTRIBUTING.md`: markdownlint command extended to `PRD.md` and `docs/*.md`; PR checklist adds a documentation-sync item.
+
 ## [v0.2.0] - 2026-11-04
 
 ### Added
