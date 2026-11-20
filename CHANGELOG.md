@@ -10,6 +10,27 @@ The format is based on Keep a Changelog principles.
 
 - Reserved for upcoming changes.
 
+## [v0.4.0] - 2026-11-20
+
+Behavior update driven by a real-user three-round test on one product brief (rugged wide tablet): mechanism-domain output was rejected twice ("these are all insurance mechanisms, unrelated to product innovation"; "worse than the earliest version — I want forced cross-category mashups, ideas first, feasibility later"), while raw category collision got the user picking numbers and asking for more. Core shift: **two modes — Inspiration (category collision) and Decision (v0.3 mechanism transfer, unchanged)**.
+
+### Added
+
+- Inspiration mode as the default for creative briefs: Stage A collision room (`references/collision-room.md`) → Gate number-picking (report numbers only, no evaluation, no recommendation) → Stage B triage room (`references/triage-room.md`); divergence and convergence strictly separated; forbidden words in divergence (cost/BOM/feasibility/risk/certification).
+- Category stimulus library: `references/stimulus-library.md` + `assets/stimulus-deck.json` — 100 cards across 11 worlds (workshop/toybox/military/biology/kitchen/sports/farm-fishing/marine-air/medical/stationery-music/abstract); Quick 12-15 mashups, Deep 40-60; ≥5 worlds, no same-world adjacency, ≥2 concrete + 1 abstract, near-temperament worlds sampled at half weight.
+- Collision-room craft: discarded cards public with cause-of-death; redundancy test (drop it if you'd think of it without the stimulus); 11 expansion moves; meta-pattern close; batch-failure diagnostics; user-rejected types re-fed as filters (no recurrence).
+- Triage-room craft: usefulness three questions (who really uses it / what job / how much better than today); feasibility ladder L0 software → L1 frame-insert → L2 mechanism (mandatory 1/10-scale downgrade test) → L3 research; show-stoppers (safety/certification/ethics/BOM > 10% of device); Top-3 seven-line landing cards; promotion hands off to Decision mode for red team.
+- `evals/cases.md` Case 8 (rugged-tablet inspiration brief; every trap drawn from the real failed rounds); `evals/rubric.md` G13 gate (inspiration-only, NA for decision outputs) + 4-metric inspiration scoring (mashup count ≥12 / pick-rate ≥15% / survival ≥1/3 / rejected-type recurrence = 0); `evals/run.md` v0.3-vs-v0.4 protocol, inspiration budget 35 min.
+- `scripts/domain_sampler.py` dual-deck support: `--stimulus --stim-count --near-world --ban-world`, world-coverage rounds, adjacency interleaving, abstract floor; self-test covers 66 domains + 100 stimulus cards.
+
+### Changed
+
+- `SKILL.md` Step 0 now decides mode first (inspiration signals: "give me a few sets of ideas / new directions / blow it up"; decision signals: budget + vetoer + landing; default inspiration), then problem type; inspiration brief limited to brief/audience/soft preferences — budget/resource/history forbidden in Stage A.
+- Speed table: Inspiration Quick 25-35 min (12-15 mashups + Top-3 cards), Inspiration Deep 60-90 min (40-60), Decision Quick 20-25 min (8 candidates + 3 cards), Decision Deep 60-90 min.
+- `references/output-templates.md`: new Template 0 for inspiration mode (Stage A deliverable, post-Gate deliverable, inspiration writing rules); decision templates unchanged.
+- `scripts/validate_skill.py`: VERSION 0.4.0, stimulus-deck schema checks (100 cards / 11 worlds / ≥10 abstract / names present in library), v0.4 anchors, evals ≥8 cases.
+- Failure-mode playbook in `SKILL.md`: "all service/business-model ideas → switch to physical-world cards"; "reasonable but boring → reviewer invaded the divergence room / category distance too small / re-feed user filter signals".
+
 ## [v0.3.0] - 2026-11-19
 
 Behavior update driven by a 4-bot red-team field evaluation (chain-restaurant ops 13/25, greenhouse agriculture 14/25, eldercare ops 14/25, structural review). Core shift: from "ideas + mechanism cards" to **landable decision cards**.

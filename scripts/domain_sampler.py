@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-"""Deterministic domain sampler for cross-domain-brainstorm v0.3.
+"""Deterministic samplers for cross-domain-brainstorm v0.4.
 
-Reads assets/domain-deck.json, compares the target's 7-axis profile with each
-domain, and returns a mix of high-distance domains, a wildcard, and (optionally)
-an anti-domain. Pure standard library.
+Two decks, two modes:
+
+- Decision mode (mechanism domains): reads assets/domain-deck.json, compares the
+  target's 7-axis profile with each domain, and returns a mix of high-distance
+  domains, a wildcard, and (optionally) an anti-domain.
+- Inspiration mode (stimulus cards): reads assets/stimulus-deck.json (100 cards
+  across 11 worlds) and enforces the collision-room rules -- world coverage,
+  no adjacent same-world cards, abstract floor, near-world quota, own-world ban.
 
 Examples:
   python scripts/domain_sampler.py --target "AI note app" \
@@ -11,7 +16,12 @@ Examples:
     --axis sync=episodic --axis risk=low --axis resource=abundant \
     --axis verification=self_reported --axis agent=individual --seed 42
 
+  python scripts/domain_sampler.py --stimulus --target "rugged tablet" \
+    --stim-count 13 --near-world workshop --ban-world "" --seed 42
+
   python scripts/domain_sampler.py --self-test
+
+Pure standard library.
 """
 
 from __future__ import annotations
@@ -24,6 +34,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DECK_PATH = ROOT / "assets" / "domain-deck.json"
+STIMULUS_PATH = ROOT / "assets" / "stimulus-deck.json"
 AXES = (
     "substrate",
     "centralization",
@@ -50,6 +61,20 @@ EXAMPLE_IDS = {
     "monastic_office",
 }
 LOW_RESOURCE = {"scarce", "volatile"}
+
+WORLDS_ZH = {
+    "workshop": "工具间",
+    "toybox": "玩具箱",
+    "military": "军品战场",
+    "biology": "生物解剖",
+    "kitchen": "厨房",
+    "sports": "运动",
+    "farm_fishing": "农具渔猎",
+    "marine_air": "航海航空",
+    "medical": "医疗急救",
+    "stationery_music": "文具乐器",
+    "abstract_systems": "抽象制度",
+}
 
 
 def load_deck(path: Path = DECK_PATH) -> dict:
@@ -274,6 +299,204 @@ def render_markdown(target_name: str, target: dict[str, str], selected: list[dic
     return "\n".join(lines)
 
 
+def load_stimulus_deck(path: Path = STIMULUS_PATH) -> dict:
+    with path.open("r", encoding="utf-8") as fh:
+        deck = json.load(fh)
+    validate_stimulus_deck(deck)
+    return deck
+
+
+def validate_stimulus_deck(deck: dict) -> None:
+    cards = deck.get("cards")
+    if not isinstance(cards, list) or len(cards) != 100:
+        found = len(cards) if isinstance(cards, list) else type(cards).__name__
+        raise ValueError(f"stimulus deck must contain exactly 100 cards, got {found}")
+    worlds = set(deck.get("worlds", []))
+    if len(worlds) != 11:
+        raise ValueError(f"stimulus deck must declare 11 worlds, got {len(worlds)}")
+    seen_ids: set[str] = set()
+    abstract = 0
+    for card in cards:
+        for key in ("id", "name", "world", "kind", "props", "mechanism"):
+            if key not in card:
+                raise ValueError(f"card missing {key!r}: {card.get('id', '?')}")
+        if card["id"] in seen_ids:
+            raise ValueError(f"duplicate stimulus id: {card['id']}")
+        seen_ids.add(card["id"])
+        if card["world"] not in worlds:
+            raise ValueError(f"unknown world {card['world']!r} for {card['id']}")
+        if card["kind"] not in ("concrete", "abstract"):
+            raise ValueError(f"bad kind {card['kind']!r} for {card['id']}")
+        if not isinstance(card["props"], list) or not card["props"]:
+            raise ValueError(f"card {card['id']} needs a non-empty props list")
+        abstract += 1 if card["kind"] == "abstract" else 0
+    if abstract < 10:
+        raise ValueError(f"stimulus deck needs >=10 abstract cards, got {abstract}")
+
+
+def interleave_no_adjacent(cards: list[dict]) -> list[dict]:
+    """Round-robin interleave so the same world never appears twice in a row."""
+    groups: dict[str, list[dict]] = {}
+    for card in cards:
+        groups.setdefault(card["world"], []).append(card)
+    pools = sorted(groups.values(), key=len, reverse=True)
+    result: list[dict] = []
+    prev_world = None
+    while pools:
+        idx = 0
+        if pools[0] and pools[0][0]["world"] == prev_world and len(pools) > 1:
+            idx = 1
+        pool = pools[idx]
+        card = pool.pop(0)
+        result.append(card)
+        prev_world = card["world"]
+        pools = [p for p in pools if p]
+        pools.sort(key=len, reverse=True)
+    return result
+
+
+def sample_stimulus(
+    deck: dict,
+    count: int = 13,
+    seed: int = 0,
+    near_world: str | None = None,
+    ban_world: str | None = None,
+    exclude: set[str] | None = None,
+) -> list[dict]:
+    """Sample stimulus cards for the collision room (inspiration mode).
+
+    Rules enforced (v0.4):
+    - the topic's own world (ban_world) is never drawn
+    - a temperament-close world (near_world) gets at most max(1, count // 20) cards
+    - per-world cap of count // 5 + 1 keeps >=5 worlds for Quick-size draws
+    - Deep-size draws (>= 30) cover all eligible worlds
+    - >= 1 abstract card (>= 3 when count >= 40); concrete dominates by deck design
+    - same world never appears in adjacent positions
+    """
+    if count < 3:
+        raise ValueError("stimulus count must be >= 3")
+    all_worlds = {card["world"] for card in deck["cards"]}
+    for label, world in (("ban_world", ban_world), ("near_world", near_world)):
+        if world and world not in all_worlds:
+            raise ValueError(f"unknown {label}: {world}; choose from {', '.join(sorted(all_worlds))}")
+    exclude = set(exclude or set())
+    rng = random.Random(seed)
+
+    by_world: dict[str, list[dict]] = {}
+    for card in deck["cards"]:
+        if card["id"] in exclude or card["world"] == ban_world:
+            continue
+        by_world.setdefault(card["world"], []).append(card)
+    for pool in by_world.values():
+        rng.shuffle(pool)
+    if sum(len(p) for p in by_world.values()) < count:
+        raise ValueError(f"only {sum(len(p) for p in by_world.values())} eligible cards, requested {count}")
+
+    near_quota = max(1, count // 20) if near_world else None
+    per_world_cap = count // 5 + 1
+    world_order = list(by_world)
+    rng.shuffle(world_order)
+
+    selected: list[dict] = []
+    taken: dict[str, int] = {}
+
+    def take(world: str) -> None:
+        card = by_world[world].pop(0)
+        selected.append(card)
+        taken[world] = taken.get(world, 0) + 1
+
+    def cap_of(world: str) -> int:
+        if near_quota is not None and world == near_world:
+            return near_quota
+        return per_world_cap
+
+    # Round 1: one card per world (coverage).
+    for world in world_order:
+        if len(selected) >= count:
+            break
+        if by_world[world] and taken.get(world, 0) < cap_of(world):
+            take(world)
+
+    # Round 2: fill from the largest remaining pools, respecting caps.
+    guard = 0
+    while len(selected) < count and guard < 10000:
+        guard += 1
+        progressed = False
+        for world in sorted(world_order, key=lambda w: len(by_world[w]), reverse=True):
+            if len(selected) >= count:
+                break
+            if by_world[world] and taken.get(world, 0) < cap_of(world):
+                take(world)
+                progressed = True
+                break
+        if not progressed:
+            # caps exhausted: relax to hard cap of ceil(count/2) for the biggest pools
+            for world in sorted(world_order, key=lambda w: len(by_world[w]), reverse=True):
+                if len(selected) >= count:
+                    break
+                if by_world[world] and taken.get(world, 0) < (count + 1) // 2:
+                    take(world)
+                    progressed = True
+                    break
+            if not progressed:
+                break
+
+    if len(selected) < count:
+        raise ValueError(f"only found {len(selected)} stimulus cards, requested {count}")
+
+    # Abstract floor.
+    abstract_floor = 3 if count >= 40 else 1
+    have_abstract = sum(1 for card in selected if card["kind"] == "abstract")
+    if have_abstract < abstract_floor:
+        spare_abstract = [
+            card
+            for pool in by_world.values()
+            for card in pool
+            if card["kind"] == "abstract"
+            and (near_quota is None or card["world"] != near_world or taken.get(card["world"], 0) < near_quota)
+        ]
+        rng.shuffle(spare_abstract)
+        droppable = sorted(
+            (i for i, card in enumerate(selected) if card["kind"] == "concrete"),
+            key=lambda i: -taken.get(selected[i]["world"], 0),
+        )
+        for replacement in spare_abstract[: abstract_floor - have_abstract]:
+            if not droppable:
+                break
+            idx = droppable.pop(0)
+            old = selected[idx]
+            taken[old["world"]] -= 1
+            selected[idx] = replacement
+            taken[replacement["world"]] = taken.get(replacement["world"], 0) + 1
+
+    return interleave_no_adjacent(selected)
+
+
+def render_stimulus_markdown(topic: str, cards: list[dict]) -> str:
+    lines = [
+        f"## 碰撞房抽牌：{topic or '(未命名题面)'}",
+        "",
+        "每组四行：品类[世界·具象/抽象] → 属性 → 嫁接 → 爽点。发散阶段禁词：成本/BOM/可行性/风险/认证。",
+        "",
+        "| # | 品类 | 世界 | 类型 | 属性 | 一句话机制 |",
+        "|---|---|---|---|---|---|",
+    ]
+    for i, card in enumerate(cards, 1):
+        lines.append(
+            "| {i} | {name} | {world} | {kind} | {props} | {mech} |".format(
+                i=i,
+                name=card["name"],
+                world=WORLDS_ZH.get(card["world"], card["world"]),
+                kind="具象" if card["kind"] == "concrete" else "抽象",
+                props="; ".join(card["props"]),
+                mech=card["mechanism"],
+            )
+        )
+    lines.append("")
+    lines.append("弃牌要写死因；冗余测试：不用这张牌也想得出的点子不算这张牌的产出。")
+    return "\n".join(lines)
+
+
 def self_test() -> int:
     deck = load_deck()
     if len(deck["domains"]) != 66:
@@ -301,7 +524,29 @@ def self_test() -> int:
     deep = sample(deck, target, count=5, seed=42, anti_domain=True)
     assert len(deep) == 5, deep
     assert any(d["role"] == "anti_domain" for d in deep), deep
-    print("SELF-TEST OK: 66 domains, 3-domain Quick sample, 5-domain Deep sample, low-resource check")
+
+    stim = load_stimulus_deck()
+    quick_cards = sample_stimulus(stim, count=13, seed=42)
+    assert len(quick_cards) == 13, quick_cards
+    quick_worlds = {c["world"] for c in quick_cards}
+    assert len(quick_worlds) >= 5, quick_worlds
+    assert sum(1 for c in quick_cards if c["kind"] == "abstract") >= 1, quick_cards
+    assert sum(1 for c in quick_cards if c["kind"] == "concrete") >= 2, quick_cards
+    for prev, curr in zip(quick_cards, quick_cards[1:]):
+        assert prev["world"] != curr["world"], (prev["id"], curr["id"])
+    deep_cards = sample_stimulus(stim, count=40, seed=7)
+    assert len(deep_cards) == 40, len(deep_cards)
+    assert len({c["world"] for c in deep_cards}) == 11, deep_cards
+    assert sum(1 for c in deep_cards if c["kind"] == "abstract") >= 3, deep_cards
+    for prev, curr in zip(deep_cards, deep_cards[1:]):
+        assert prev["world"] != curr["world"], (prev["id"], curr["id"])
+    tuned = sample_stimulus(stim, count=12, seed=3, near_world="military", ban_world="toybox")
+    assert not any(c["world"] == "toybox" for c in tuned), tuned
+    assert sum(1 for c in tuned if c["world"] == "military") <= max(1, 12 // 20), tuned
+    print(
+        "SELF-TEST OK: 66 domains, 3-domain Quick sample, 5-domain Deep sample, "
+        "low-resource check, 100-card stimulus deck (13-quick / 40-deep / near-ban)"
+    )
     return 0
 
 
@@ -314,51 +559,75 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--wildcard", type=int, default=1, help="wildcard slots (default: 1)")
     parser.add_argument("--anti-domain", action="store_true", help="include one anti-domain slot (Deep mode)")
     parser.add_argument("--exclude", default="", help="comma-separated domain ids to exclude")
+    parser.add_argument("--stimulus", action="store_true", help="sample stimulus cards (inspiration mode / collision room)")
+    parser.add_argument("--stim-count", type=int, default=13, help="number of stimulus cards (default: 13; Deep: 40-60)")
+    parser.add_argument("--near-world", default="", help="world id temperament-close to the topic; quota capped at max(1, count//20)")
+    parser.add_argument("--ban-world", default="", help="world id matching the topic's own category; excluded entirely")
     parser.add_argument("--json", action="store_true", help="emit JSON instead of markdown")
-    parser.add_argument("--self-test", action="store_true", help="validate the deck and run fixed samples")
+    parser.add_argument("--self-test", action="store_true", help="validate both decks and run fixed samples")
     args = parser.parse_args(argv)
 
     if args.self_test:
         return self_test()
 
     try:
-        target = parse_axes(args.axis)
-        if len(target) < 3 or not any(axis in target for axis in STRUCTURAL):
-            raise ValueError(
-                "provide at least 3 axes, including one structural axis "
-                "(centralization, sync, or verification)"
+        if args.stimulus:
+            deck = load_stimulus_deck()
+            exclude = {item.strip() for item in args.exclude.split(",") if item.strip()}
+            cards = sample_stimulus(
+                deck,
+                count=args.stim_count,
+                seed=args.seed,
+                near_world=args.near_world or None,
+                ban_world=args.ban_world or None,
+                exclude=exclude,
             )
-        deck = load_deck()
-        for axis, value in target.items():
-            allowed = deck["axes"].get(axis, [])
-            if value not in allowed:
+        else:
+            target = parse_axes(args.axis)
+            if len(target) < 3 or not any(axis in target for axis in STRUCTURAL):
                 raise ValueError(
-                    f"axis {axis}={value!r} is not in the deck; choose from {', '.join(allowed)}"
+                    "provide at least 3 axes, including one structural axis "
+                    "(centralization, sync, or verification)"
                 )
-        exclude = {item.strip() for item in args.exclude.split(",") if item.strip()}
-        selected = sample(
-            deck,
-            target,
-            count=args.count,
-            seed=args.seed,
-            wildcard=args.wildcard,
-            anti_domain=args.anti_domain,
-            exclude=exclude,
-        )
+            deck = load_deck()
+            for axis, value in target.items():
+                allowed = deck["axes"].get(axis, [])
+                if value not in allowed:
+                    raise ValueError(
+                        f"axis {axis}={value!r} is not in the deck; choose from {', '.join(allowed)}"
+                    )
+            exclude = {item.strip() for item in args.exclude.split(",") if item.strip()}
+            cards = None
+            selected = sample(
+                deck,
+                target,
+                count=args.count,
+                seed=args.seed,
+                wildcard=args.wildcard,
+                anti_domain=args.anti_domain,
+                exclude=exclude,
+            )
     except (ValueError, OSError, json.JSONDecodeError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
+    if args.stimulus:
+        payload = cards
+        text = render_stimulus_markdown(args.target, cards)
+    else:
+        payload = selected
+        text = render_markdown(args.target, target, selected)
+
     if args.json:
         print(
             json.dumps(
-                {"target": args.target, "axes": target, "seed": args.seed, "domains": selected},
+                {"target": args.target, "seed": args.seed, "stimulus": bool(args.stimulus), "cards": payload},
                 ensure_ascii=False,
                 indent=2,
             )
         )
     else:
-        print(render_markdown(args.target, target, selected))
+        print(text)
     return 0
 
 

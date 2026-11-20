@@ -5,11 +5,13 @@ Pure standard library. Checks:
 - required files and SKILL.md frontmatter
 - references and relative markdown links
 - domain deck schema (66 unique domains, valid axes; new domains carry tags)
+- stimulus deck schema (100 unique cards across 11 worlds, abstract floor)
 - every domain appears in references/domain-library.md
-- eval cases count (>=7, must include an ops case)
+- eval cases count (>=8, must include an ops case and an inspiration case)
 - v0.3 anchors: landing card, three numbers, precedent check, G11/G12
+- v0.4 anchors: dual-mode fork, collision/triage rooms, stimulus library
 - markdown table column consistency
-- domain sampler self-test
+- domain sampler self-test (both decks)
 """
 
 from __future__ import annotations
@@ -21,7 +23,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.3.0"  # bump together with SKILL.md frontmatter and assets/domain-deck.json
+VERSION = "0.4.0"  # bump together with SKILL.md frontmatter and both deck json files
 AXES = {
     "substrate": {"physical", "digital", "social", "biological", "institutional"},
     "centralization": {"centralized", "distributed", "networked"},
@@ -45,6 +47,9 @@ REQUIRED = [
     ".markdownlintignore",
     ".github/workflows/ci.yml",
     "references/domain-library.md",
+    "references/collision-room.md",
+    "references/triage-room.md",
+    "references/stimulus-library.md",
     "references/mechanism-examples.md",
     "references/grafting.md",
     "references/convergence.md",
@@ -54,6 +59,7 @@ REQUIRED = [
     "references/example-session.md",
     "references/example-session-hardware.md",
     "assets/domain-deck.json",
+    "assets/stimulus-deck.json",
     "scripts/domain_sampler.py",
     "scripts/validate_skill.py",
     "scripts/package.ps1",
@@ -189,24 +195,71 @@ def check_domain_library(deck: dict) -> None:
     print(f"OK domain-library names ({len(deck['domains'])})")
 
 
+def check_stimulus_deck() -> None:
+    deck_path = ROOT / "assets/stimulus-deck.json"
+    try:
+        deck = json.loads(read(deck_path))
+    except json.JSONDecodeError as exc:
+        fail(f"stimulus-deck.json is not valid JSON: {exc}")
+    if deck.get("version") != VERSION:
+        fail(f"stimulus-deck.json version must be {VERSION}, found {deck.get('version')!r}")
+    worlds = deck.get("worlds", [])
+    if len(worlds) != 11 or len(set(worlds)) != 11:
+        fail(f"stimulus deck must declare 11 unique worlds, found {len(worlds)}")
+    cards = deck.get("cards", [])
+    if len(cards) != 100:
+        fail(f"expected 100 stimulus cards, found {len(cards)}")
+    ids, names = set(), set()
+    per_world: dict[str, int] = {}
+    abstract = 0
+    for card in cards:
+        for key in ("id", "name", "world", "kind", "props", "mechanism"):
+            if key not in card:
+                fail(f"stimulus card missing {key}: {card.get('id', '?')}")
+        if card["id"] in ids or card["name"] in names:
+            fail(f"duplicate stimulus card: {card['id']} / {card['name']}")
+        ids.add(card["id"])
+        names.add(card["name"])
+        if card["world"] not in worlds:
+            fail(f"unknown world {card['world']!r} for {card['id']}")
+        if card["kind"] not in ("concrete", "abstract"):
+            fail(f"bad kind {card['kind']!r} for {card['id']}")
+        if not isinstance(card["props"], list) or not card["props"]:
+            fail(f"card {card['id']} needs a non-empty props list")
+        per_world[card["world"]] = per_world.get(card["world"], 0) + 1
+        abstract += 1 if card["kind"] == "abstract" else 0
+    if abstract < 10:
+        fail(f"stimulus deck needs >=10 abstract cards, found {abstract}")
+    starved = [w for w, n in per_world.items() if n < 8]
+    if starved:
+        fail(f"every world needs >=8 cards; starved: {', '.join(starved)}")
+    lib = read(ROOT / "references/stimulus-library.md")
+    missing = [card["name"] for card in cards if card["name"] not in lib]
+    if missing:
+        fail(f"stimulus-library.md missing card names: {', '.join(missing[:5])} ...")
+    print(f"OK stimulus deck (100 cards, 11 worlds, {abstract} abstract, all listed in library)")
+
+
 def check_evals() -> None:
     text = read(ROOT / "evals/cases.md")
     count = len(re.findall(r"^## Case \d+", text, flags=re.MULTILINE))
-    if count < 7:
-        fail(f"evals/cases.md should contain at least 7 cases, found {count}")
+    if count < 8:
+        fail(f"evals/cases.md should contain at least 8 cases, found {count}")
     if "运营/执行题" not in text or "Case 7" not in text:
         fail("evals/cases.md must include Case 7 as an ops/execution case")
+    if "灵感" not in text or "Case 8" not in text:
+        fail("evals/cases.md must include Case 8 as an inspiration-mode case")
     for name in ("rubric.md", "run.md"):
         if not (ROOT / "evals" / name).exists():
             fail(f"missing evals/{name}")
     rubric = read(ROOT / "evals/rubric.md")
-    for anchor in ("| G11 |", "| G12 |", "采纳归属", "先例证据等级"):
+    for anchor in ("| G11 |", "| G12 |", "| G13 |", "采纳归属", "先例证据等级"):
         if anchor not in rubric:
-            fail(f"evals/rubric.md missing v0.3 anchor: {anchor}")
+            fail(f"evals/rubric.md missing anchor: {anchor}")
     run = read(ROOT / "evals/run.md")
-    for anchor in ("25 分钟", "G11", "G12"):
+    for anchor in ("25 分钟", "G11", "G12", "G13", "灵感模式"):
         if anchor not in run:
-            fail(f"evals/run.md missing v0.3 anchor: {anchor}")
+            fail(f"evals/run.md missing anchor: {anchor}")
     print(f"OK eval cases ({count})")
 
 
@@ -232,6 +285,30 @@ def check_v03_anchors() -> None:
         if anchor not in red:
             fail(f"references/red-team.md missing v0.3 anchor: {anchor}")
     print("OK v0.3 anchors")
+
+
+def check_v04_anchors() -> None:
+    skill = read(ROOT / "SKILL.md")
+    for anchor in ("灵感模式", "决策模式", "碰撞房", "筛选房", "品类刺激", "元模式", "禁词", "1/10 降级版"):
+        if anchor not in skill:
+            fail(f"SKILL.md missing v0.4 anchor: {anchor}")
+    collision = read(ROOT / "references/collision-room.md")
+    for anchor in ("禁止出现", "弃牌", "redundancy", "元模式", "扩容"):
+        if anchor not in collision:
+            fail(f"references/collision-room.md missing v0.4 anchor: {anchor}")
+    triage = read(ROOT / "references/triage-room.md")
+    for anchor in ("有用性三问", "可行性阶梯", "show-stopper", "降级版", "L0", "L3"):
+        if anchor not in triage:
+            fail(f"references/triage-room.md missing v0.4 anchor: {anchor}")
+    stim_lib = read(ROOT / "references/stimulus-library.md")
+    for anchor in ("100 张", "11 个世界", "不相邻", "抽象"):
+        if anchor not in stim_lib:
+            fail(f"references/stimulus-library.md missing v0.4 anchor: {anchor}")
+    tmpl = read(ROOT / "references/output-templates.md")
+    for anchor in ("灵感模式模板", "碰撞组", "爽点", "挑号"):
+        if anchor not in tmpl:
+            fail(f"references/output-templates.md missing v0.4 anchor: {anchor}")
+    print("OK v0.4 anchors")
 
 
 def check_tables() -> None:
@@ -296,8 +373,10 @@ def main() -> int:
     check_links()
     deck = check_deck()
     check_domain_library(deck)
+    check_stimulus_deck()
     check_evals()
     check_v03_anchors()
+    check_v04_anchors()
     check_tables()
     check_sampler()
     print("VALIDATION OK")
