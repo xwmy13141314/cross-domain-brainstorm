@@ -10,6 +10,27 @@ The format is based on Keep a Changelog principles.
 
 - Reserved for upcoming changes.
 
+## [v0.3.0] - 2026-11-19
+
+Behavior update driven by a 4-bot red-team field evaluation (chain-restaurant ops 13/25, greenhouse agriculture 14/25, eldercare ops 14/25, structural review). Core shift: from "ideas + mechanism cards" to **landable decision cards**.
+
+### Added
+
+- Step 0 problem-type branch (product/experience vs ops/execution) with three numbers (budget cap / executor minutes / verifier capacity) plus a named vetoer; unknowns must be labeled, never fabricated.
+- Three 7-line landing cards (existing alternative / what it fails at / mechanism + failure precondition / cheapest test / scaled cost range + unknowns / who pays-executes-embeds / kill + stop signal); a card that cannot be filled keeps the idea out of the portfolio.
+- Two Pass/Fail gates applied only to the 3 finalist bets: cost fit and capacity fit, with "shrink scope once, then kill" handling; wildcard passes on probe cost (1/10 budget or one person-day).
+- Mandatory precedent check (competitors / public cases / platform-or-patent) with search scope, date, evidence grade; "未查" allowed, fabrication forbidden.
+- Domain library 48→66: +10 low-resource & informal-economy domains, +8 agriculture/food/supply-chain domains; 5 tags (resource / power / observation / verifier capacity / example) and 3 hard sampling rules (≥1 low-resource card for low-resource targets; ≤1 example card; target-industry cards banned).
+- `evals/cases.md` Case 7 (eldercare service quality, ops case with the three numbers and vetoer); `evals/rubric.md` G11/G12 gates + 2 required fields (adoption ownership, precedent evidence grade); `evals/run.md` switched to v0.2-vs-v0.3, Quick cap 25 min, fabricated precedents auto-fail.
+
+### Changed
+
+- Quick: 15→20-25 min, 10→8 ideas (6 regular + 1 A×B + 1 negative transfer; 1/10-scale variant mandatory). Per-idea five surface-copy tests dropped (finalists only, once each); decision log dropped.
+- Anti-mediocrity test reanchored from "covered by an existing product" to the three questions (how is it done today / what does that fail to do / what does the new idea spend more and less of) — fixes both the SOP-blind spot on ops problems and the false kill of "old form, new structure".
+- Red team: verifier questions 4→8 (capacity source, overflow triage, right to refuse/escalate); high-risk list extended to food/agrochemicals/chemicals/frontline-worker safety; red light = one redesign, then kill.
+- `scripts/domain_sampler.py`: 66 cards, low-resource guarantee, example-card cap. `scripts/validate_skill.py`: VERSION 0.3.0, deck 66, ≥7 eval cases incl. ops case, v0.3 anchor checks.
+- Optional scoring 0-2 → 1-5 with anchors; feasibility/acceptability excluded from totals.
+
 ## [v0.2.1] - 2026-11-05
 
 Documentation and release-engineering patch. **No behavior changes**: the v0.2.0 workflow, quality gates, and output contract are unchanged.

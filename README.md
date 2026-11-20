@@ -1,12 +1,12 @@
-# 跨域迁移脑暴 v0.2.1
+# 跨域迁移脑暴 v0.3.0
 
-A cross-domain ideation skill that transfers **causal mechanisms**, not surface features.
+A cross-domain ideation skill that transfers **causal mechanisms**, not surface features — and lands them as **decision cards** with owners, budgets, and kill conditions.
 
-一个用于产品/功能/交互/服务模式创新的跨域脑暴 skill：从结构异质的领域借“因果机制”，严格映射到目标问题，最后给出一个小组合的、可被证伪的下注。
+一个用于产品/功能/交互/服务/运营流程创新的跨域脑暴 skill：从结构异质的领域借“因果机制”，严格映射到目标问题，最后给出一个小组合的、可被证伪、可落地的下注。
 
 它不靠“看竞品、做组合”，而是靠：
 
-> **问题解码 → 距离采样 → 机制卡 → 结构嫁接 → 组合决策 → 红队**
+> **题型判定 → 问题解码 → 距离采样 → 机制卡 → 结构嫁接 → 组合决策（落地卡+成本容量门）→ 红队**
 
 ## 文档与版本
 
@@ -14,28 +14,29 @@ A cross-domain ideation skill that transfers **causal mechanisms**, not surface 
 |---|---|
 | [PRD.md](PRD.md) | 产品需求文档：用户、目标、功能需求、验收标准 |
 | [CHANGELOG.md](CHANGELOG.md) | 版本记录（Keep a Changelog） |
-| [docs/RELEASE-NOTES-v0.2.1.md](docs/RELEASE-NOTES-v0.2.1.md) | 本版修改说明与升级指引 |
+| [docs/RELEASE-NOTES-v0.3.0.md](docs/RELEASE-NOTES-v0.3.0.md) | 本版修改说明与升级指引 |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献指南与发布流程 |
 
-当前版本：**v0.2.1**（文档/发布层更新，无行为变化；行为版本为 v0.2.0）。
+当前版本：**v0.3.0**（行为更新：题型分支、三个数+否决者、3 张落地卡、成本/容量 Pass/Fail 门、先例三查、领域库 48→66、Quick 20-25 分钟）。
 
 ---
 
-## v0.2 有什么不同
+## v0.3 有什么不同
 
-v0.1 是一个轻量、好用的创意框架；v0.2 把它升级成一个**可追溯、可检验、可证伪**的机制迁移引擎。
+v0.2 把脑暴升级成可追溯、可检验的机制迁移引擎；v0.3 依据 4 个独立 bot 的行业实测（餐饮/农业/养老），把输出从“创意+评分”升级为**可落地的决策卡**。
 
-| 维度 | v0.1 | v0.2 |
+| 维度 | v0.2 | v0.3 |
 |---|---|---|
-| 领域 | 静态清单 + 三分类 | 结构三轴 + 情境四轴 + 48 领域牌堆 + wildcard |
-| 机制 | 一句模板 | 9 字段机制卡 + 触发/反馈/失效前提 |
-| 嫁接 | 固定句式 | 结构映射 + 5 个表面复制测试 + 组合/负向迁移 |
-| 发散 | 6 个，提前看评分 | 10-18 个，发散/收敛分离 |
-| 收敛 | 4 维 0-2 分，Top 3 | 反平庸 + 门槛 + safe/bold/wildcard + 最便宜证伪 |
-| 验证 | 通用建议 | 最危险假设 + 便宜实验 + 阈值 + kill 条件 |
-| 伦理 | 无 | 必过红队 |
-| 团队 | 主持词 | 时间盒 + 静默写作 + 轮流 + dot voting + pre-mortem |
-| 评测 | 无 | 6 case + 7 维 rubric + A/B 协议 |
+| 题型 | 默认产品题 | Step 0 分支：产品/体验 vs 运营/执行 |
+| 约束 | 硬约束只在框定提 | 三个数（预算/执行分钟/验证容量）+否决者，全流程回检 |
+| 创意 | 10 个 | 8 个（6+A×B+负向；1/10 版必选），决赛才做表面检查 |
+| 收敛 | 反平庸一句话 + 四门槛 | 反平庸三问 + 四门槛 + 成本/容量 Pass/Fail 门（超限先缩一次） |
+| 交付 | Top3 + 评分表 | 3 张 7 行落地卡（谁买单/谁执行/嵌哪一步/kill 信号） |
+| 先例 | 无 | 强制三查（竞品/案例/专利），写检索范围+日期+证据等级，未查可标、编造禁止 |
+| 领域 | 48 张 | 66 张（+10 低资源/非正规、+8 农业/食品供应链）+5 标签+3 硬规则 |
+| 反平庸 | 锚“现有产品” | 三问锚“现有做法/SOP”，不再误杀“形式旧结构新” |
+| 红队 | 验证者 4 问 | 8 问（含容量来源/超载处置）；高风险加食品/农残/工人安全；红灯 redesign 一次 |
+| 评测 | 6 case | 7 case（含养老运营题）+ G11/G12 门 + 2 字段 |
 
 ---
 
@@ -85,12 +86,12 @@ v0.1 是一个轻量、好用的创意框架；v0.2 把它升级成一个**可�
 
 | | Quick（默认） | Deep |
 |---|---|---|
-| 时间 | 约 15 分钟 | 60-90 分钟 |
+| 时间 | 约 20-25 分钟 | 60-90 分钟 |
 | 领域 | 3 个 | 5 个 |
 | 机制 | 3 张卡 | 3-5 张卡 |
-| 候选 | 10 个左右 | 15-18 个 |
-| 输出 | 2 页 | 4 页 + 决策 memo |
-| 适合 | 聊天、单人、快速破局 | 工作坊、高风险、需要买账 |
+| 候选 | 8 个（6+A×B+负向） | 15-18 个 |
+| 交付 | 2 页 + 3 张落地卡 + 两门 + 三查 | 4 页 + 决策 memo + 利益相关者 + pre-mortem |
+| 适合 | 聊天、单人、快速破局、运营试点 | 工作坊、高风险、需要买账 |
 
 Quick 不是“简化版的方法”，而是“同样的方法，少填几张表”。门槛和测试不能省。
 
@@ -157,26 +158,27 @@ cross-domain-brainstorm/
 ├── CONTRIBUTING.md
 ├── LICENSE
 ├── docs/
-│   └── RELEASE-NOTES-v0.2.1.md      # 本版修改说明
+│   ├── RELEASE-NOTES-v0.2.1.md      # v0.2.1 修改说明
+│   └── RELEASE-NOTES-v0.3.0.md      # 本版修改说明
 ├── references/
-│   ├── domain-library.md          # 距离模型 + 48 领域牌堆
+│   ├── domain-library.md          # 距离模型 + 66 领域牌堆 + 5 标签/3 硬规则
 │   ├── mechanism-examples.md      # 机制卡 + 5 个检验 + 样例
-│   ├── grafting.md                # 结构映射 + 表面复制测试 + 组合/负向迁移
-│   ├── convergence.md             # 反平庸 + 门槛 + 组合 + 假设实验
-│   ├── red-team.md                # 伦理/现状/二阶效应/高风险
+│   ├── grafting.md                # 结构映射 + 决赛表面检查 + 组合/负向迁移
+│   ├── convergence.md             # 反平庸三问 + 门槛 + 两门 + 落地卡 + 先例三查
+│   ├── red-team.md                # 伦理/现状/验证容量/二阶效应/高风险
 │   ├── facilitation.md            # 团队工作坊协议
 │   ├── output-templates.md        # Quick/Deep 模板
-│   ├── example-session.md         # AI 笔记 App 完整演练
-│   └── example-session-hardware.md# 老人智能家居完整演练
+│   ├── example-session.md         # AI 笔记 App 完整演练（v0.2 机制演示）
+│   └── example-session-hardware.md# 老人智能家居完整演练（v0.2 机制演示）
 ├── assets/
-│   └── domain-deck.json           # 48 领域结构化数据
+│   └── domain-deck.json           # 66 领域结构化数据（18 张带标签）
 ├── scripts/
-│   ├── domain_sampler.py          # 确定性领域抽样
+│   ├── domain_sampler.py          # 确定性领域抽样（低资源保障/示例限额）
 │   ├── validate_skill.py          # 包校验
 │   └── package.ps1                # 重新打包 zip
 ├── evals/
-│   ├── cases.md                   # 6 个评测 case
-│   ├── rubric.md                  # 7 维 rubric + 门槛
+│   ├── cases.md                   # 7 个评测 case（含运营题）
+│   ├── rubric.md                  # 7 维 rubric + G1-G12 门槛 + 2 字段
 │   └── run.md                     # A/B 协议
 └── .github/workflows/ci.yml       # 校验 + markdown lint
 ```

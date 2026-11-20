@@ -3,12 +3,12 @@
 | 项目 | 内容 |
 |---|---|
 | 产品名 | `cross-domain-brainstorm`（跨域迁移脑暴） |
-| 当前版本 | **0.2.1** |
-| 文档版本 | 1.0 |
-| 状态 | Released（文档与发布层更新） |
-| 最后更新 | 2026-11-05 |
+| 当前版本 | **0.3.0** |
+| 文档版本 | 1.1 |
+| 状态 | Released（行为更新：落地卡/成本容量门/先例三查） |
+| 最后更新 | 2026-11-19 |
 | 所有者 | xwmy13141314 |
-| 相关文档 | [README](README.md) · [CHANGELOG](CHANGELOG.md) · [Release Notes](docs/RELEASE-NOTES-v0.2.1.md) · [SKILL.md](SKILL.md) |
+| 相关文档 | [README](README.md) · [CHANGELOG](CHANGELOG.md) · [Release Notes](docs/RELEASE-NOTES-v0.3.0.md) · [SKILL.md](SKILL.md) |
 
 ---
 
@@ -250,31 +250,41 @@ Deep 加：评分表、利益相关者地图、pre-mortem、领域账本。
 
 ### FR-11 确定性抽样器
 
-- `assets/domain-deck.json` 作为机器可读牌堆。
+- `assets/domain-deck.json` 作为机器可读牌堆（v0.3：66 领域，18 张新牌带 5 标签）。
 - `scripts/domain_sampler.py`：纯标准库；支持 target 7 轴、seed、count、wildcard、anti-domain、exclude、JSON/markdown。
-- `--self-test` 验证 48 领域、3/5 领域样例。
+- `--self-test` 验证 66 领域、3/5 领域样例、低资源保障、示例牌 ≤1。
 
 **验收**：同一 seed + 同一 target 输出稳定；自测通过；不等于“替人做判断”。
 
 ### FR-12 评测
 
-- 6 个 case：AI 笔记、智能手表、企业知识库、订阅留存、公共服务预约、老人智能家居。
+- 7 个 case：AI 笔记、智能手表、企业知识库、订阅留存、公共服务预约、老人智能家居、**社区居家养老服务质量（运营/执行题）**。
 - 7 维 rubric：机制深度、距离/桥、新颖性、有用性、可追溯、可测试、伦理。
-- 10 个门槛。
-- A/B 协议：盲标、3 评委、15 分钟上限、先 3 case 再 6 case。
+- 12 个门槛（G1-G12，新增 G11 成本/容量门、G12 先例三查）+ 2 个必填字段（采纳归属、先例证据等级）。
+- A/B 协议：盲标、3 评委、Quick 上限 25 分钟（v0.2 基线 15 分钟）、Pilot 3 case（含 Case 7）再 Main 7 case；先例编造直接判负。
 
-**验收**：v0.2 在至少 4/7 维优于 v0.1，且有用性/可读性不下降；门槛通过率不低于 v0.1。
+**验收**：v0.3 在至少 4/7 维优于 v0.2，G11/G12 通过，Case 7 落地卡可执行；门槛通过率不低于 v0.2。
 
 ### FR-13 文档与版本
 
 - `README.md`：定位、安装、Quickstart、文件地图、示例、评测、License。
 - `PRD.md`：本文件。
 - `CHANGELOG.md`：Keep a Changelog 风格。
-- `docs/RELEASE-NOTES-v0.2.1.md`：本版修改说明。
+- `docs/RELEASE-NOTES-v0.3.0.md`：本版修改说明（v0.2.1 notes 保留）。
 - `SKILL.md` frontmatter、`assets/domain-deck.json`、README、CHANGELOG 版本号同步。
-- semver：文档修补 `0.2.x`；行为变化 `0.3.0`；稳定 `1.0.0`。
+- semver：文档修补 `0.3.x`；行为变化 `0.4.0`；稳定 `1.0.0`。
 
 **验收**：版本号四处一致；validator 检查；zip 重新打包。
+
+### FR-14 落地与先例（v0.3 新增）
+
+- Step 0 题型分支（产品/体验 vs 运营/执行），评估侧重随题型切换。
+- 三个数 + 否决者（预算上限/执行人分钟/验证者容量），未知必须标注，禁止编造。
+- 3 张 7 行落地卡（现有替代/它做不到什么/机制+失效前提/最便宜测试/规模成本区间+未知/谁买单谁执行嵌哪一步/Kill+停止信号）；填不满不进组合。
+- 两个 Pass/Fail 门（成本 fit、容量 fit），只对 3 个决赛 bet；超限先缩范围一次；wildcard 按探针成本过门。
+- 先例三查（竞品/公开案例/平台或专利）强制，写检索范围+日期+证据等级；无工具写“未查”；编造禁止；查到直接先例必须写差异。
+
+**验收**：Quick 输出第 1 页为执行者可照做的一页；每个决赛 bet 有采纳归属与证据等级；未知项明确标注。
 
 ## 7. 非功能需求
 
@@ -283,36 +293,37 @@ Deep 加：评分表、利益相关者地图、pre-mortem、领域账本。
 | 上下文效率 | `SKILL.md` 是入口；细节放 references 按需读取；避免重复 |
 | 可移植 | 不硬编码模型/平台；相对路径；Claude Skill 格式 |
 | 确定性 | 抽样器支持 seed；同一输入稳定 |
-| 安全 | 不提供有害示例；高风险场景要求核实/人工复核 |
+| 安全 | 不提供有害示例；高风险场景要求核实/人工复核；先例禁止编造 |
 | 可维护 | validator + CI + package 脚本；semver；单一事实源 |
 | 语言 | 中文为主；README 带英文摘要 |
-| 性能 | Quick 15 分钟；Deep 60-90 分钟；页数限制 |
-| 兼容 | 保留现有文件名；新增文档不破坏 v0.2.0 用法 |
+| 性能 | Quick 20-25 分钟；Deep 60-90 分钟；页数限制 |
+| 兼容 | 保留现有文件名；新增文档不破坏 v0.2.1 用法；deck tags 只加新牌 |
 
 ## 8. 用户流程
 
 ### Quick（默认）
 
 ```text
-触发 → 问题解码 → 8 项 brief → 3 轴坐标 → 3 领域
-→ 3 张机制卡 → 映射 + 10 创意 → 反平庸 + 门槛
-→ safe/bold/wildcard → 红队 → 下一步
+触发 → 题型判定 → 问题解码 + 三个数/否决者 → 3 轴坐标 → 3 领域
+→ 3 张机制卡 → 映射 + 8 创意（6+A×B+负向，1/10 版必选）
+→ 反平庸三问 + 门槛 + 成本/容量 Pass/Fail 门（超限缩一次）
+→ 先例三查 → 3 张落地卡 → 红队（决赛各 1 次表面检查）
 ```
 
 ### Deep
 
 ```text
-触发 → 完整 brief → 7 轴坐标 → 5 领域（含 anti-domain）
+触发 → 完整 brief + 题型/三个数 → 7 轴坐标 → 5 领域（含 anti-domain）
 → 3-5 张机制卡 → 映射 + 15-18 创意 + 组合矩阵
-→ 评分辅助 + 组合优化 + 最便宜证伪 → 红队 + pre-mortem
-→ 决策 memo
+→ 评分辅助 + 组合优化 + 最便宜证伪 + 两门 → 红队 + pre-mortem
+→ 决策 memo + 3 张落地卡
 ```
 
 ### 团队
 
 ```text
 会前 brief/领域 → 静默写作 → 轮流 → build-and-jump
-→ dot voting → pre-mortem → 组合 + owner
+→ dot voting → pre-mortem → 组合 + owner + 落地卡
 ```
 
 ## 9. 交付物与文件
@@ -321,7 +332,7 @@ Deep 加：评分表、利益相关者地图、pre-mortem、领域账本。
 |---|---|
 | `SKILL.md` | 技能入口/流程/质量门 |
 | `references/*.md` | 方法、领域、模板、示例 |
-| `assets/domain-deck.json` | 48 领域结构化数据 |
+| `assets/domain-deck.json` | 66 领域结构化数据（18 张带标签） |
 | `scripts/domain_sampler.py` | 确定性抽样 |
 | `scripts/validate_skill.py` | 包校验 |
 | `scripts/package.ps1` | 打包 zip |
@@ -329,42 +340,44 @@ Deep 加：评分表、利益相关者地图、pre-mortem、领域账本。
 | `PRD.md` | 本文件 |
 | `README.md` | 项目说明 |
 | `CHANGELOG.md` | 版本记录 |
-| `docs/RELEASE-NOTES-v0.2.1.md` | 本版修改说明 |
+| `docs/RELEASE-NOTES-v0.3.0.md` | 本版修改说明 |
 | `cross-domain-brainstorm.zip` | 分发包 |
 
 ## 10. 验收标准
 
-发布 v0.2.1 前必须全部通过：
+发布 v0.3.0 前必须全部通过：
 
 - [ ] `python scripts/validate_skill.py` → `VALIDATION OK`
 - [ ] `python scripts/domain_sampler.py --self-test` → `SELF-TEST OK`
-- [ ] markdownlint 16 个项目文件 → 0 errors
+- [ ] markdownlint 全部项目文件 → 0 errors
 - [ ] zip 解包后 validator → `VALIDATION OK`
 - [ ] `SKILL.md` / `README.md` / `CHANGELOG.md` / `PRD.md` 版本号一致
 - [ ] `PRD.md`、release notes 已加入包
-- [ ] 无行为变更（v0.2.0 → v0.2.1 仅文档/发布层）
-- [ ] Git tag `v0.2.1` 与 release notes 对应
+- [ ] 行为变更符合 release notes（题型分支/落地卡/两门/三查/66 牌）
+- [ ] Git tag `v0.3.0` 与 release notes 对应
 
 ## 11. 评测与指标
 
 | 指标 | 目标 |
 |---|---|
-| 机制深度 | ≥4/7 维优于 v0.1 |
-| 去名测试通过率 | ≥80% Top 创意 |
+| 机制深度 | ≥4/7 维优于 v0.2 |
+| 去名测试通过率 | ≥80% 决赛创意 |
 | 机制卡失效前提 | 100% |
-| 验证者检查 | ≥80% Top 创意 |
+| 验证者检查 | ≥80% 决赛创意（含容量来源） |
 | 组合多样性 | ≥3 个不同机制 |
-| 完成时间 | Quick ≤15 min；Deep ≤90 min |
-| 门槛通过率 | 不低于 v0.1 |
+| 完成时间 | Quick ≤25 min；Deep ≤90 min |
+| 门槛通过率 | 不低于 v0.2；G11/G12 全过 |
+| 落地卡可执行性 | Case 7 执行者明早能照做 |
+| 先例证据 | 无编造；直接先例有差异说明 |
 | 伦理 | 至少 1 个 case 主动 kill 有害/不可测试创意 |
 
-真人 A/B 盲评尚未执行；v0.2.1 发布不阻塞，但 v0.3 前应完成 3 个 case 的 pilot。
+真人 A/B 盲评尚未执行；v0.3.0 发布不阻塞，但 v0.4 前应完成 3 个 case 的 pilot（含 Case 7）。
 
 ## 12. 版本与发布
 
 - **0.2.0**：机制迁移引擎重构（行为版本）。
 - **0.2.1**：PRD、README、release notes、版本同步、包更新（文档/发布层）。
-- **0.3.0**：下一轮行为变化（如评分/深挖模式/新领域）。
+- **0.3.0**：落地卡/两门/三查/题型分支/66 牌（行为版本，依据 4-bot 实测）。
 - **1.0.0**：接口稳定。
 
 发布步骤：
@@ -373,7 +386,7 @@ Deep 加：评分表、利益相关者地图、pre-mortem、领域账本。
 2. 运行 validator + sampler + markdownlint。
 3. 重新打包 zip。
 4. 解包复验。
-5. Commit + tag `v0.2.1`。
+5. Commit + tag `v0.3.0`。
 6. Push main + tag；创建 GitHub Release，附 zip。
 
 ## 13. 风险

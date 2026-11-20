@@ -4,9 +4,10 @@
 Pure standard library. Checks:
 - required files and SKILL.md frontmatter
 - references and relative markdown links
-- domain deck schema (48 unique domains, valid axes)
+- domain deck schema (66 unique domains, valid axes; new domains carry tags)
 - every domain appears in references/domain-library.md
-- eval cases count
+- eval cases count (>=7, must include an ops case)
+- v0.3 anchors: landing card, three numbers, precedent check, G11/G12
 - markdown table column consistency
 - domain sampler self-test
 """
@@ -20,7 +21,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.2.1"  # bump together with SKILL.md frontmatter and assets/domain-deck.json
+VERSION = "0.3.0"  # bump together with SKILL.md frontmatter and assets/domain-deck.json
 AXES = {
     "substrate": {"physical", "digital", "social", "biological", "institutional"},
     "centralization": {"centralized", "distributed", "networked"},
@@ -148,14 +149,22 @@ def check_deck() -> dict:
         fail(f"domain-deck.json is not valid JSON: {exc}")
     if deck.get("version") != VERSION:
         fail(f"domain-deck.json version must be {VERSION}, found {deck.get('version')!r}")
-    if len(deck.get("domains", [])) != 48:
-        fail(f"expected 48 domains, found {len(deck.get('domains', []))}")
+    if len(deck.get("domains", [])) != 66:
+        fail(f"expected 66 domains, found {len(deck.get('domains', []))}")
     domains = deck["domains"]
     ids, names = set(), set()
+    tagged = 0
     for domain in domains:
         for key in ("id", "name", "family", "axes", "mechanisms", "richness"):
             if key not in domain:
                 fail(f"domain missing {key}: {domain.get('id', '?')}")
+        if "tags" in domain:
+            tagged += 1
+            for tag_key in ("resource", "power", "observation", "verifier_capacity", "example"):
+                if tag_key not in domain["tags"]:
+                    fail(f"domain {domain['id']} tags missing {tag_key}")
+            if domain["tags"]["resource"] != domain["axes"]["resource"]:
+                fail(f"domain {domain['id']} tags.resource disagrees with axes.resource")
         if domain["id"] in ids or domain["name"] in names:
             fail(f"duplicate domain: {domain['id']} / {domain['name']}")
         ids.add(domain["id"])
@@ -166,7 +175,9 @@ def check_deck() -> dict:
             value = domain["axes"].get(axis)
             if value not in allowed:
                 fail(f"bad axis {axis}={value!r} for {domain['id']}")
-    print(f"OK domain deck ({len(domains)} domains)")
+    if tagged < 18:
+        fail(f"expected >=18 tagged domains (new families), found {tagged}")
+    print(f"OK domain deck ({len(domains)} domains, {tagged} tagged)")
     return deck
 
 
@@ -181,12 +192,46 @@ def check_domain_library(deck: dict) -> None:
 def check_evals() -> None:
     text = read(ROOT / "evals/cases.md")
     count = len(re.findall(r"^## Case \d+", text, flags=re.MULTILINE))
-    if count < 6:
-        fail(f"evals/cases.md should contain at least 6 cases, found {count}")
+    if count < 7:
+        fail(f"evals/cases.md should contain at least 7 cases, found {count}")
+    if "运营/执行题" not in text or "Case 7" not in text:
+        fail("evals/cases.md must include Case 7 as an ops/execution case")
     for name in ("rubric.md", "run.md"):
         if not (ROOT / "evals" / name).exists():
             fail(f"missing evals/{name}")
+    rubric = read(ROOT / "evals/rubric.md")
+    for anchor in ("| G11 |", "| G12 |", "采纳归属", "先例证据等级"):
+        if anchor not in rubric:
+            fail(f"evals/rubric.md missing v0.3 anchor: {anchor}")
+    run = read(ROOT / "evals/run.md")
+    for anchor in ("25 分钟", "G11", "G12"):
+        if anchor not in run:
+            fail(f"evals/run.md missing v0.3 anchor: {anchor}")
     print(f"OK eval cases ({count})")
+
+
+def check_v03_anchors() -> None:
+    skill = read(ROOT / "SKILL.md")
+    for anchor in ("题型", "预算上限", "验证者容量", "否决者", "落地卡", "先例三查", "缩范围"):
+        if anchor not in skill:
+            fail(f"SKILL.md missing v0.3 anchor: {anchor}")
+    conv = read(ROOT / "references/convergence.md")
+    for anchor in ("反平庸三问", "成本 fit", "容量 fit", "先例三查", "缩范围", "本实验不能验证什么"):
+        if anchor not in conv:
+            fail(f"references/convergence.md missing v0.3 anchor: {anchor}")
+    tmpl = read(ROOT / "references/output-templates.md")
+    for anchor in ("7. Kill + 停止信号", "成本 fit（Pass/Fail）", "证据等级", "明早能照做"):
+        if anchor not in tmpl:
+            fail(f"references/output-templates.md missing v0.3 anchor: {anchor}")
+    lib = read(ROOT / "references/domain-library.md")
+    for anchor in ("五个标签", "三条硬规则", "低资源与非正规经济", "农业、食品与供应链", "66 个领域"):
+        if anchor not in lib:
+            fail(f"references/domain-library.md missing v0.3 anchor: {anchor}")
+    red = read(ROOT / "references/red-team.md")
+    for anchor in ("验证容量", "食品", "只给一次 redesign"):
+        if anchor not in red:
+            fail(f"references/red-team.md missing v0.3 anchor: {anchor}")
+    print("OK v0.3 anchors")
 
 
 def check_tables() -> None:
@@ -252,6 +297,7 @@ def main() -> int:
     deck = check_deck()
     check_domain_library(deck)
     check_evals()
+    check_v03_anchors()
     check_tables()
     check_sampler()
     print("VALIDATION OK")

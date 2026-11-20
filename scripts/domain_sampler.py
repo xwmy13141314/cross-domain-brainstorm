@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deterministic domain sampler for cross-domain-brainstorm v0.2.
+"""Deterministic domain sampler for cross-domain-brainstorm v0.3.
 
 Reads assets/domain-deck.json, compares the target's 7-axis profile with each
 domain, and returns a mix of high-distance domains, a wildcard, and (optionally)
@@ -39,7 +39,17 @@ ROLE_LABEL = {
     "high_distance": "高距离",
     "wildcard": "wildcard",
     "anti_domain": "anti-domain",
+    "low_resource": "低资源",
 }
+EXAMPLE_IDS = {
+    "er_triage",
+    "nursing_handoff",
+    "aviation_checklist",
+    "audit",
+    "immune_system",
+    "monastic_office",
+}
+LOW_RESOURCE = {"scarce", "volatile"}
 
 
 def load_deck(path: Path = DECK_PATH) -> dict:
@@ -106,6 +116,14 @@ def is_anti_domain(target: dict[str, str], domain: dict) -> bool:
         target.get("verification") and domain["axes"]["verification"] != target["verification"],
     ]
     return sum(1 for check in checks if check) >= 2
+
+
+def is_example(domain: dict) -> bool:
+    return domain["id"] in EXAMPLE_IDS
+
+
+def is_low_resource(domain: dict) -> bool:
+    return domain["axes"]["resource"] in LOW_RESOURCE
 
 
 def sample(
@@ -181,6 +199,45 @@ def sample(
     if len(selected) < count:
         raise ValueError(f"only found {len(selected)} domains, requested {count}")
 
+    # Low-resource targets need at least one scarce/volatile domain.
+    if target.get("resource") in LOW_RESOURCE and count >= 2:
+        if not any(is_low_resource(item["domain"]) for item in selected):
+            has_example = any(is_example(item["domain"]) for item in selected)
+            pool = [
+                item
+                for item in remaining
+                if is_low_resource(item["domain"])
+                and (not has_example or not is_example(item["domain"]))
+            ]
+            if pool:
+                for idx in range(len(selected) - 1, -1, -1):
+                    if selected[idx]["role"] == "high_distance":
+                        chosen = pool[0]
+                        chosen["role"] = "low_resource"
+                        selected[idx] = chosen
+                        remaining.remove(chosen)
+                        break
+
+    # At most one example domain per sample; wildcard must not be a second example.
+    if len(selected) >= 3:
+        examples = [item for item in selected if is_example(item["domain"])]
+        if len(examples) > 1:
+            keep = max(examples, key=lambda item: item["score"])
+            for item in examples:
+                if item is keep:
+                    continue
+                pool = [
+                    candidate
+                    for candidate in remaining
+                    if not is_example(candidate["domain"])
+                ]
+                if not pool:
+                    break
+                replacement = pool[0]
+                replacement["role"] = item["role"]
+                selected[selected.index(item)] = replacement
+                remaining.remove(replacement)
+
     for item in selected:
         item["domain"] = dict(item["domain"])
         item["domain"]["role"] = item["role"]
@@ -219,8 +276,8 @@ def render_markdown(target_name: str, target: dict[str, str], selected: list[dic
 
 def self_test() -> int:
     deck = load_deck()
-    if len(deck["domains"]) != 48:
-        raise AssertionError(f"expected 48 domains, got {len(deck['domains'])}")
+    if len(deck["domains"]) != 66:
+        raise AssertionError(f"expected 66 domains, got {len(deck['domains'])}")
     target = {
         "substrate": "digital",
         "centralization": "distributed",
@@ -233,13 +290,18 @@ def self_test() -> int:
     selected = sample(deck, target, count=3, seed=42)
     assert len(selected) == 3, selected
     assert any(d["role"] == "wildcard" for d in selected), selected
+    assert sum(1 for d in selected if d["id"] in EXAMPLE_IDS) <= 1, selected
     for domain in selected:
         assert len(domain["diff_axes"]) >= 3, domain
         assert domain["structural_diff"], domain
+    low_target = dict(target, resource="scarce")
+    low = sample(deck, low_target, count=3, seed=7)
+    assert len(low) == 3, low
+    assert any(d["axes"]["resource"] in LOW_RESOURCE for d in low), low
     deep = sample(deck, target, count=5, seed=42, anti_domain=True)
     assert len(deep) == 5, deep
     assert any(d["role"] == "anti_domain" for d in deep), deep
-    print("SELF-TEST OK: 48 domains, 3-domain Quick sample, 5-domain Deep sample")
+    print("SELF-TEST OK: 66 domains, 3-domain Quick sample, 5-domain Deep sample, low-resource check")
     return 0
 
 
