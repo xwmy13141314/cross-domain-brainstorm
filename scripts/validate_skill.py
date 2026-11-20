@@ -23,7 +23,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.4.0"  # bump together with SKILL.md frontmatter and both deck json files
+VERSION = "0.4.1"  # bump together with SKILL.md frontmatter and both deck json files
 AXES = {
     "substrate": {"physical", "digital", "social", "biological", "institutional"},
     "centralization": {"centralized", "distributed", "networked"},
@@ -58,6 +58,7 @@ REQUIRED = [
     "references/output-templates.md",
     "references/example-session.md",
     "references/example-session-hardware.md",
+    "references/example-session-inspiration.md",
     "assets/domain-deck.json",
     "assets/stimulus-deck.json",
     "scripts/domain_sampler.py",
@@ -311,6 +312,22 @@ def check_v04_anchors() -> None:
     print("OK v0.4 anchors")
 
 
+def check_v041_anchors() -> None:
+    # v0.4.1: 模式门边界判据（验收发现：无预算字眼的团队决策题会被误路由进碰撞房）
+    skill = read(ROOT / "SKILL.md")
+    for anchor in ("边界判据", "行为/留存", "可推进的方向"):
+        if anchor not in skill:
+            fail(f"SKILL.md missing v0.4.1 mode-gate anchor: {anchor}")
+    example = read(ROOT / "references/example-session-inspiration.md")
+    for anchor in ("弃牌", "元模式", "只报编号", "回灌", "转决策模式"):
+        if anchor not in example:
+            fail(f"references/example-session-inspiration.md missing v0.4.1 anchor: {anchor}")
+    readme = read(ROOT / "README.md")
+    if "PYTHONIOENCODING" not in readme:
+        fail("README.md missing v0.4.1 GBK hint anchor: PYTHONIOENCODING")
+    print("OK v0.4.1 anchors")
+
+
 def check_tables() -> None:
     problems = []
     for path in markdown_files():
@@ -377,6 +394,7 @@ def main() -> int:
     check_evals()
     check_v03_anchors()
     check_v04_anchors()
+    check_v041_anchors()
     check_tables()
     check_sampler()
     print("VALIDATION OK")

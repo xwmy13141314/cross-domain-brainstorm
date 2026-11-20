@@ -1,5 +1,5 @@
 {
-  "version": "0.4.0",
+  "version": "0.4.1",
   "updated": "2026-11-20",
   "worlds": ["workshop", "toybox", "military", "biology", "kitchen", "sports", "farm_fishing", "marine_air", "medical", "stationery_music", "abstract_systems"],
   "cards": [

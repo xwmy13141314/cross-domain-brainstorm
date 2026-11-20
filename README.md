@@ -1,4 +1,4 @@
-# 跨域脑暴 v0.4.0
+# 跨域脑暴 v0.4.1
 
 A cross-domain ideation skill with two modes: **Inspiration** (category collision — ideas first, feasibility later) and **Decision** (transfer causal mechanisms into landable decision cards with owners, budgets, and kill conditions).
 
@@ -15,11 +15,12 @@ A cross-domain ideation skill with two modes: **Inspiration** (category collisio
 |---|---|
 | [PRD.md](PRD.md) | 产品需求文档：用户、目标、功能需求、验收标准 |
 | [CHANGELOG.md](CHANGELOG.md) | 版本记录（Keep a Changelog） |
-| [docs/RELEASE-NOTES-v0.4.0.md](docs/RELEASE-NOTES-v0.4.0.md) | 本版修改说明与升级指引 |
+| [docs/RELEASE-NOTES-v0.4.1.md](docs/RELEASE-NOTES-v0.4.1.md) | 本版修改说明与升级指引 |
+| [docs/RELEASE-NOTES-v0.4.0.md](docs/RELEASE-NOTES-v0.4.0.md) | 上一版（双模式引入） |
 | [docs/RELEASE-NOTES-v0.3.0.md](docs/RELEASE-NOTES-v0.3.0.md) | v0.3 修改说明（决策模式全流程） |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献指南与发布流程 |
 
-当前版本：**v0.4.0**（行为更新：双模式——灵感模式=品类碰撞房+100 刺激牌+挑号 Gate+筛选房；决策模式=v0.3 全套保留）。
+当前版本：**v0.4.1**（v0.4.0 引入双模式——灵感模式=品类碰撞房+100 刺激牌+挑号 Gate+筛选房，决策模式=v0.3 全套保留；v0.4.1 修补模式门边界判据+补灵感模式示例）。
 
 ---
 
@@ -174,7 +175,7 @@ cross-domain-brainstorm/
 ├── docs/
 │   ├── RELEASE-NOTES-v0.2.1.md      # v0.2.1 修改说明
 │   ├── RELEASE-NOTES-v0.3.0.md      # v0.3 修改说明
-│   └── RELEASE-NOTES-v0.4.0.md      # 本版修改说明
+│   └── RELEASE-NOTES-v0.4.1.md      # 本版修改说明（v0.4.0 归档保留）
 ├── references/
 │   ├── collision-room.md            # 灵感模式·碰撞房规则（禁词/弃牌/扩容器/元模式）
 │   ├── triage-room.md               # 灵感模式·筛选房（有用性三问/可行性阶梯/show-stopper）
@@ -230,6 +231,15 @@ python scripts/domain_sampler.py --stimulus --stim-count 13 --near-world militar
 
 输出带编号的刺激牌表（#/品类/世界/类型/属性/一句话机制），覆盖 ≥5 世界、同世界不相邻。
 
+**Windows 注意**：GBK 控制台会把 CLI 的中文输出打成乱码（管道下双重乱码）。两种解法：
+
+```powershell
+# 解法一：设 UTF-8 后再跑
+$env:PYTHONIOENCODING = "utf-8"; python scripts/domain_sampler.py --stimulus --stim-count 13
+# 解法二：模块直调，写入 UTF-8 文件（长会话推荐，也方便 exclude 已出过的牌）
+python -c "from scripts.domain_sampler import load_stimulus_deck, sample_stimulus; import pathlib; d=load_stimulus_deck(); c=sample_stimulus(d,count=15,seed=20261120); pathlib.Path('batch.md').write_text('\n'.join(f'{x[\"id\"]} {x[\"name\"]} [{x[\"world\"]}]' for x in c),encoding='utf-8')"
+```
+
 脚本只是“抽牌器”，不替代判断；桥、机制、验证仍要人来写。
 
 ---
@@ -238,6 +248,7 @@ python scripts/domain_sampler.py --stimulus --stim-count 13 --near-world militar
 
 - [AI 笔记 App](references/example-session.md)：低风险、数字、个人；演示如何淘汰“经验条/AI 摘要/每日提醒”，用分诊/审计/免疫系统生成“决策票据/风险票据/记忆集”等。
 - [老人智能家居](references/example-session-hardware.md)：高风险、物理、多利益相关者；演示如何用检查单/交接班/日课，避免“更多摄像头/健康评分”。
+- [阔直板三防机（灵感模式）](references/example-session-inspiration.md)：真实会话浓缩；演示碰撞房四行、弃牌死因、元模式、Gate 只报编号、用户否决信号回灌、筛选房 Top-3。
 
 ---
 
@@ -299,7 +310,7 @@ MIT。见 [LICENSE](LICENSE)。
 
 **Core principles**: ideas before feasibility (inspiration) / mechanisms, not features (decision); require a failure precondition; separate divergence from convergence; rejected types never come back; ethics as a gate.
 
-**Repo layout**: `SKILL.md` is the entry point; `PRD.md` documents goals, requirements, and acceptance criteria; `references/` contains the collision/triage rooms, the stimulus library, the domain deck, mechanism cards, grafting, convergence, red team, facilitation, templates, and two full worked examples; `assets/` holds both machine-readable decks; `evals/` contains 8 cases, a 7-dimension rubric with G1-G13 gates, and an A/B protocol; release notes live under `docs/`.
+**Repo layout**: `SKILL.md` is the entry point; `PRD.md` documents goals, requirements, and acceptance criteria; `references/` contains the collision/triage rooms, the stimulus library, the domain deck, mechanism cards, grafting, convergence, red team, facilitation, templates, and three full worked examples; `assets/` holds both machine-readable decks; `evals/` contains 8 cases, a 7-dimension rubric with G1-G13 gates, and an A/B protocol; release notes live under `docs/`.
 
 **Install**: place this folder in your agent's skills directory, with `SKILL.md` at the skill root. See [README.md](README.md) for details.
 

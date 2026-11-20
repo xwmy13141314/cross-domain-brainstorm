@@ -3,12 +3,12 @@
 | 项目 | 内容 |
 |---|---|
 | 产品名 | `cross-domain-brainstorm`（跨域脑暴） |
-| 当前版本 | **0.4.0** |
-| 文档版本 | 1.2 |
+| 当前版本 | **0.4.1** |
+| 文档版本 | 1.3 |
 | 状态 | Released（行为更新：双模式——灵感/决策） |
 | 最后更新 | 2026-11-20 |
 | 所有者 | xwmy13141314 |
-| 相关文档 | [README](README.md) · [CHANGELOG](CHANGELOG.md) · [Release Notes](docs/RELEASE-NOTES-v0.4.0.md) · [SKILL.md](SKILL.md) |
+| 相关文档 | [README](README.md) · [CHANGELOG](CHANGELOG.md) · [Release Notes](docs/RELEASE-NOTES-v0.4.1.md)（[v0.4.0](docs/RELEASE-NOTES-v0.4.0.md)） · [SKILL.md](SKILL.md) |
 
 ---
 
@@ -109,13 +109,13 @@
 
 ### FR-1 触发与边界
 
-- 必须识别模式信号：灵感=「创意几组/新方向/炸想法」；决策=「带预算/否决者/要落地」。判不准默认灵感。
+- 必须识别模式信号：灵感=「创意几组/新方向/炸想法」；决策=「带预算/否决者/要落地」或（v0.4.1 边界判据）「团队执行者在问 + 问题具体到行为/留存层 + 输出要能推进」——后者即使无预算/否决字眼也判决策。判不准默认灵感，仅限个人探索、无指标、纯要灵感。
 - 必须识别“卡住/同质化/要多候选/需要机制解释”的场景。
 - 必须拒绝研究、最终拍板、单点建议、PRD 定稿、文章写作。
 - 用户给的是方案时，先做“问题解码”，不直接发散。
 - 信息不全时最多问 2 个问题，其余标假设继续，不阻塞。
 
-**验收**：用 10 条正例/反例测试，模式判定与触发准确率 ≥80%；不得在“只要一个建议”时强行输出 10 个创意。
+**验收**：用 10 条正例/反例测试，模式判定与触发准确率 ≥80%（含 AI 笔记型边界题：字面像灵感、实为决策）；不得在“只要一个建议”时强行输出 10 个创意。
 
 ### FR-2 问题框定
 
@@ -276,7 +276,7 @@ Deep 加：评分表、利益相关者地图、pre-mortem、领域账本。
 - `README.md`：定位、安装、Quickstart、文件地图、示例、评测、License。
 - `PRD.md`：本文件。
 - `CHANGELOG.md`：Keep a Changelog 风格。
-- `docs/RELEASE-NOTES-v0.4.0.md`：本版修改说明（v0.2.1/v0.3.0 notes 保留）。
+- `docs/RELEASE-NOTES-v0.4.1.md`：本版修改说明（历史版本 notes 保留）。
 - `SKILL.md` frontmatter、`assets/*.json`、README、CHANGELOG 版本号同步。
 - semver：文档修补 `0.4.x`；行为变化 `0.5.0`；稳定 `1.0.0`。
 
@@ -367,22 +367,22 @@ Deep 加：评分表、利益相关者地图、pre-mortem、领域账本。
 | `PRD.md` | 本文件 |
 | `README.md` | 项目说明 |
 | `CHANGELOG.md` | 版本记录 |
-| `docs/RELEASE-NOTES-v0.4.0.md` | 本版修改说明 |
+| `docs/RELEASE-NOTES-v0.4.1.md` | 本版修改说明（历史版本 notes 保留） |
 | `cross-domain-brainstorm.zip` | 分发包 |
 
 ## 10. 验收标准
 
-发布 v0.4.0 前必须全部通过：
+发布 v0.4.1 前必须全部通过：
 
-- [ ] `python scripts/validate_skill.py` → `VALIDATION OK`
+- [ ] `python scripts/validate_skill.py` → `VALIDATION OK`（含 v0.4.1 anchors）
 - [ ] `python scripts/domain_sampler.py --self-test` → `SELF-TEST OK`（66 领域 + 100 刺激牌）
 - [ ] markdownlint 全部项目文件 → 0 errors
 - [ ] zip 解包后 validator → `VALIDATION OK`
 - [ ] `SKILL.md` / `README.md` / `CHANGELOG.md` / `PRD.md` / 两个 deck 版本号一致
 - [ ] `PRD.md`、release notes 已加入包
-- [ ] 行为变更符合 release notes（双模式/碰撞房/挑号/筛选房/100 牌/G13）
-- [ ] 决策模式回归：Case 7 输出与 v0.3 行为一致
-- [ ] Git tag `v0.4.0` 与 release notes 对应
+- [ ] 行为变更符合 release notes（模式门边界判据/灵感示例/GBK 提示）
+- [ ] 决策模式回归：Case 7 与 Case 1 验收结论在案（23/25、21/25）
+- [ ] Git tag `v0.4.1` 与 release notes 对应
 
 ## 11. 评测与指标
 
@@ -409,6 +409,7 @@ Deep 加：评分表、利益相关者地图、pre-mortem、领域账本。
 - **0.2.1**：PRD、README、release notes、版本同步、包更新（文档/发布层）。
 - **0.3.0**：落地卡/两门/三查/题型分支/66 牌（行为版本，依据 4-bot 实测）。
 - **0.4.0**：双模式——灵感模式（品类碰撞房/挑号/筛选房/100 刺激牌）+ 决策模式保留（行为版本，依据真实用户三轮实测）。
+- **0.4.1**：验收补丁——模式门边界判据（团队+行为/留存问题+要推进→决策）、灵感模式示例会话、GBK 提示（文档/入口层，无流程变更）。
 - **1.0.0**：接口稳定。
 
 发布步骤：
@@ -417,7 +418,7 @@ Deep 加：评分表、利益相关者地图、pre-mortem、领域账本。
 2. 运行 validator + sampler + markdownlint。
 3. 重新打包 zip。
 4. 解包复验。
-5. Commit + tag `v0.4.0`。
+5. Commit + tag `v0.4.1`。
 6. Push main + tag；创建 GitHub Release，附 zip。
 
 ## 13. 风险

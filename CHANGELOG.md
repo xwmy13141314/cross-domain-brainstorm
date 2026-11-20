@@ -10,6 +10,22 @@ The format is based on Keep a Changelog principles.
 
 - Reserved for upcoming changes.
 
+## [v0.4.1] - 2026-11-20
+
+Acceptance-patch release. Two decision-mode regression checks passed (eldercare ops 23/25 vs 14/25 on v0.2.1; AI-notes 21/25, no "ops-landing degradation"), and one entry bug surfaced: briefs from a product team with a concrete behavioral/retention problem read like inspiration signals (no budget/veto words) and would default into the collision room.
+
+### Added
+
+- Mode-gate boundary rule in `SKILL.md`: team-executor asking + problem concrete at behavior/retention level + output must be actionable → Decision mode even without budget/veto words; default-inspiration only for personal exploration with no metrics. Added a matching decision-signal sample quote.
+- `references/example-session-inspiration.md`: full inspiration-mode worked example condensed from the real rugged-tablet session — collision four-liners, discards with cause-of-death, meta-pattern, Gate numbers-only script, both real user responses (ask-for-more / pick-and-veto), rejected-signal re-feeding, triage three-questions + ladder + two Top-3 cards, hand-off to decision mode.
+- Windows note in `README.md`: GBK consoles garble sampler CLI Chinese output; `PYTHONIOENCODING=utf-8` or module-direct call writing a UTF-8 file.
+- `evals/cases.md` Case 1: v0.4+ mode-boundary note (AI-notes brief must route to decision mode).
+
+### Changed
+
+- `scripts/validate_skill.py`: VERSION 0.4.1; new `check_v041_anchors` (mode-gate boundary wording, inspiration example anchors, GBK hint); example file added to REQUIRED.
+- Both deck JSONs' version metadata bumped to 0.4.1 (content unchanged).
+
 ## [v0.4.0] - 2026-11-20
 
 Behavior update driven by a real-user three-round test on one product brief (rugged wide tablet): mechanism-domain output was rejected twice ("these are all insurance mechanisms, unrelated to product innovation"; "worse than the earliest version — I want forced cross-category mashups, ideas first, feasibility later"), while raw category collision got the user picking numbers and asking for more. Core shift: **two modes — Inspiration (category collision) and Decision (v0.3 mechanism transfer, unchanged)**.
